@@ -1,10 +1,8 @@
-import sys
 import h5py
 import numpy as np
 from pathlib import Path
 from skimage import io
 import re
-import cv2
 
 img_path = Path(r'Z:\20210930_dummy\MIP')
 illcorr_path = Path(r'Z:\illumination_correction')
@@ -37,12 +35,13 @@ for idx, site in enumerate(sites):
         for channel in channel_data:
             if channel in str(fyle):
                 img = io.imread(fyle, plugin="tifffile")
-                corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
+                #corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
+                corrected_image = img
                 channel_data[channel].append(corrected_image)
 
     # Open the experiment HDF5 file in "append" mode
 
-    file = h5py.File(output_path.joinpath('site_%d.hdf5' %idx), "w")
+    file = h5py.File(output_path.joinpath('site_%04d.hdf5' %idx), "w")
     chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel]))))
     chunk[0] = 1
     chunk = tuple(chunk)
