@@ -5,9 +5,9 @@ from skimage import io
 import re
 import sys
 
-img_path = Path(r'Z:\20210930_dummy\MIP')
-illcorr_path = Path(r'Z:\illumination_correction')
-output_path = Path(r'Z:\20210930_dummy\hdf5')
+img_path = Path(r'/data/active/atschan/20210930_dummy/MIP/')
+illcorr_path = Path(r'/data/active/atschan/illumination_correction/')
+output_path = Path(r'/data/active/atschan/20210930_dummy/hdf5/')
 
 img_files = img_path.glob('*.tif')
 img_files = [fyle for fyle in img_files]
