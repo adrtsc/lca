@@ -1,36 +1,26 @@
 import skimage.measure
 import pandas as pd
 
-def measure_morphology(file):
+def measure_morphology(label_images):
 
-    # iterate over all objects and measure their features
-    regionprops = pd.DataFrame()
+    object_regionprops = pd.DataFrame()
 
-    for oid, object in enumerate(file['label_images'].keys()):
+    # measure regionprops for each timepoint
 
-        object_regionprops = pd.DataFrame()
+    features = ('label', 'area', 'bbox', 'bbox_area', 'centroid',
+                'convex_area', 'eccentricity', 'equivalent_diameter',
+                'euler_number', 'extent', 'major_axis_length',
+                'minor_axis_length', 'moments', 'moments_central',
+                'moments_hu', 'moments_normalized', 'orientation',
+                'perimeter', 'solidity')
 
-        # measure regionprops for each timepoint
+    for idx, label_image in enumerate(list(label_images)):
 
-        features = ('label', 'area', 'bbox', 'bbox_area', 'centroid',
-                    'convex_area', 'eccentricity', 'equivalent_diameter',
-                    'euler_number', 'extent', 'major_axis_length',
-                    'minor_axis_length', 'moments', 'moments_central',
-                    'moments_hu', 'moments_normalized', 'orientation',
-                    'perimeter', 'solidity')
+        current_regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image, properties=features))
 
-        for idx, label_image in enumerate(list(file['label_images/%s' % object])):
+        #feature_names = list(current_regionprops.keys())
+        #current_regionprops.columns = [ t + '_%s' % object for t in feature_names]
 
-            current_regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image,
-                                                                                 properties=features))
-            feature_names = list(current_regionprops.keys())
-            current_regionprops.columns = [ t + '_%s' % object for t in feature_names]
+        object_regionprops = pd.concat([object_regionprops, current_regionprops])
 
-            if oid == 0:
-                current_regionprops['timepoint'] = idx
-
-            object_regionprops = pd.concat([object_regionprops, current_regionprops])
-
-        regionprops = pd.concat([regionprops, object_regionprops],axis=1, sort=False)
-
-    return regionprops
+    return object_regionprops
