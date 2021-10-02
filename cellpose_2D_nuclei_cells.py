@@ -66,15 +66,18 @@ for idx, nuclei_image in enumerate(list(nuclei_images)):
 
 # create new group for label images and create dataset for nuclei
 grp = file.create_group("label_images")
+chunk = np.shape(nuclei_images)
+chunk[0] = 1
+chunk = tuple(chunk)
 
 # Create a dataset in the file
 dataset = grp.create_dataset('nuclei', np.shape(nuclei), h5py.h5t.STD_U16BE, data=nuclei,
-                             compression='gzip', chunks=np.shape(nuclei_images[0, :, :]), shuffle=True,fletcher32=True)
+                             compression='gzip', chunks=chunk, shuffle=True,fletcher32=True)
 
 dataset.attrs.create(name="element_size_um", data=(1, 0.1625, 0.1625))
 
 dataset = grp.create_dataset('cells', np.shape(cells), h5py.h5t.STD_U16BE, data=cells,
-                             compression='gzip', chunks=np.shape(cell_images[0, :, :]), shuffle=True,fletcher32=True)
+                             compression='gzip', chunks=chunk, shuffle=True,fletcher32=True)
 
 dataset.attrs.create(name="element_size_um", data=(1, 0.1625, 0.1625))
 
