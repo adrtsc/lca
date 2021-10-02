@@ -66,7 +66,7 @@ for idx, nuclei_image in enumerate(list(nuclei_images)):
 
 # create new group for label images and create dataset for nuclei
 grp = file.create_group("label_images")
-chunk = np.shape(nuclei_images)
+chunk = list(np.shape(nuclei_images))
 chunk[0] = 1
 chunk = tuple(chunk)
 
