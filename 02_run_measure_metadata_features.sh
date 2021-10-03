@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Submit a job array with index values between 0 and 5 (inclusive)
-#SBATCH --array=1-30
+#SBATCH --array=1-4
 
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
