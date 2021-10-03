@@ -1,4 +1,5 @@
 import skimage.measure
+from skimage.feature import blob_log
 import pandas as pd
 from lca.utils import measure_border_cells
 
@@ -106,3 +107,38 @@ class Metadata(Features):
             object_regionprops = pd.concat([object_regionprops, current_regionprops])
 
         return object_regionprops
+
+
+class Blobs(Features):
+
+    def __init__(self, label_images, intensity_images):
+        self.label_images = label_images
+        self.intensity_images = intensity_images
+
+    def extract(self, min_sigma=5, max_sigma=10, num_sigma=1, threshold=0.001, overlap=0.5, exclude_border=True):
+
+        blobs = pd.DataFrame()
+
+        for idx, label_image in enumerate(list(self.label_images)):
+            intensity_image = self.intensity_images[idx, :, :]
+            current_blobs = blob_log(intensity_image,
+                                     min_sigma=min_sigma,
+                                     max_sigma=max_sigma,
+                                     num_sigma=num_sigma,
+                                     threshold=threshold,
+                                     overlap=overlap,
+                                     exclude_border=exclude_border)
+
+            current_blobs = pd.DataFrame(current_blobs, columns=['y_coordinates',
+                                                                 'x_coordinates',
+                                                                 'size'])
+            object_labels = []
+            for index, blob in current_blobs.iterrows():
+                current_label = label_image[int(blob['y_coordinates']), int(blob['x_coordinates'])]
+                object_labels.append(current_label)
+
+            current_blobs['label'] = object_labels
+            current_blobs = current_blobs.loc[current_blobs['label'] > 0]
+            blobs = pd.concat([blobs, current_blobs])
+
+        return blobs
