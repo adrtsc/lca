@@ -1,6 +1,6 @@
 import skimage.measure
 import pandas as pd
-from lca.measure_border_cells import measure_border_cells
+from lca.utils import measure_border_cells
 
 
 class Features():
@@ -25,7 +25,7 @@ class Morphology(Features):
 
         # measure regionprops for each timepoint
 
-        features = ('label', 'area', 'bbox', 'bbox_area', 'centroid',
+        features = ('area', 'bbox', 'bbox_area', 'centroid',
                     'convex_area', 'eccentricity', 'equivalent_diameter',
                     'euler_number', 'extent', 'major_axis_length',
                     'minor_axis_length', 'moments', 'moments_central',

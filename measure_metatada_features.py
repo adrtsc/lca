@@ -4,6 +4,7 @@ import pandas as pd
 import sys
 from lca.LapTracker import LapTracker
 from lca.features import Metadata, Morphology, Intensity
+from lca.utils import measure_assignment
 import numpy as np
 
 # set paths
@@ -12,15 +13,15 @@ path_to_features = Path(r"Z:\20210930_dummy\features")
 
 # define settings
 settings = {'nuclei': {'channels':['sdcGFP', 'sdcDAPIxmRFPm'],
-                       'assigned_object':'cells',
+                       'assigned_objects':[],
                        'aggregate':False,
                        'track':True},
             'cells': {'channels':['sdcGFP', 'sdcDAPIxmRFPm'],
-                      'assigned_object':'cells',
+                      'assigned_objects':['nuclei', 'nuclear_speckles'],
                       'aggregate':False,
                       'track':False},
             'nuclear_speckles': {'channels':['sdcGFP', 'sdcDAPIxmRFPm'],
-                                 'assigned_object':'cells',
+                                 'assigned_objects':[],
                                  'aggregate':True,
                                  'track':False}}
 
@@ -57,7 +58,7 @@ for object_id, object in enumerate(settings.keys()):
     fv = pd.concat([morphology_features, intensity_features], axis=1)
 
     # add a unique identifier for every object, currently allows for 10000 occurences per object per site
-    unique_object_id = np.arange(0, len(md))+(site*len(settings.keys())*100000)+100000*object_id
+    unique_object_id = np.arange(0, len(md))+((site-1)*len(settings.keys())*100000)+100000*object_id
 
     md['unique_object_id'] = unique_object_id
     fv['unique_object_id'] = unique_object_id
@@ -85,39 +86,47 @@ for object_id, object in enumerate(settings.keys()):
 # assignment between objects
 '''
 two things to do: if there is a 1:1 relationship, one can just concatenate the dataframes. That's simple
-if there is a many-to-one relationship, one has to aggregate the measurements
-first one would have to figure out which objects are assigned together - for simplicity let's assume we only
-want to assign everything to cells
+if there is a many-to-one relationship, one has to aggregate the measurements (at the moment I only do mean aggregation)
 '''
 
 for object_id, object in enumerate(settings.keys()):
 
-    if object != settings[object]['assigned_object']:
+    if settings[object]['assigned_objects']:
 
-        assigned_object = settings[object]['assigned_object']
         md = pd.read_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
-        fv = pd.read_csv(path_to_features.joinpath('site_%04d_%s_fv.csv' % (site, object)))
-        md_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, assigned_object)))
-        fv_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_fv.csv' % (site, assigned_object)))
+        fv = pd.read_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+        fv = fv.set_index('unique_object_id')
 
         label_images = file['label_images/%s' % object][:]
-        assigned_label_images = file['label_images/%s' % settings[object]['assigned_object']][:]
 
-        assigned_md = measure_assignment(label_images, assigned_label_images, md, md_assignment)
-        fv['unique_id'] = assigned_md['unique_id']
+            for assigned_object in settings[object]['assigned_objects']:
 
-        if settings[object]['aggregate'] == True:
-            fv = fv.groupby('unique_id').mean()
+                md_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, assigned_object)))
+                fv_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, assigned_object)))
 
-        else:
-            fv = fv.set_index('unique_id')
+                assigned_label_images = file['label_images/%s' % assigned_object][:]
 
-        fv_assignment = fv_assignment.set_index('unique_id')
+                assigned_md = measure_assignment(assigned_label_images, label_images, md_assignment, md)
+                fv_assignment['unique_object_id'] = assigned_md['unique_object_id']
 
-        # rename the columns of dataframe to be assigned to another
-        fv.columns = [ t + '_%s' % object for t in list(fv.keys())]
+                if settings[assigned_object]['aggregate'] == True:
+                    counts = fv_assignment.groupby('unique_object_id').size()
+                    fv_assignment = fv_assignment.groupby('unique_object_id').mean()
+                    fv_assignment['count'] = counts
 
-        result = fv_assignment.join(fv)
-        result = result.drop('label_%s' % object, axis='columns')
+                else:
+                    fv_assignment = fv_assignment.set_index('unique_object_id')
 
-        result.to_csv(path_to_features.joinpath('site_%04d_%s_fv.csv' % (site, assigned_object)))
+                # rename the columns of dataframe to be assigned to another and join the dfs
+                fv_assignment.columns = [ t + '_%s' % assigned_object for t in list(fv_assignment.keys())]
+
+                fv = fv.join(fv_assignment)
+
+                # check if assigned object was tracked and add track id if it was
+                if hasattr(md_assignment, 'track_id'):
+                    md['track_id_%s' % assigned_object] = md_assignment['track_id']
+
+            fv.to_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+            md.to_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
+    else:
+        pass
