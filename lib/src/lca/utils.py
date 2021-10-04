@@ -59,3 +59,11 @@ def get_parent_labels(label_img_1, label_img_2):
             assigned_labels.append(assigned_label[0])
 
     return assigned_labels
+
+
+def get_label_difference(label_1, label_2):
+    A = np.copy(label_1)
+    A[label_2 > 0] = 0
+
+    return A
+

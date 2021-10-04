@@ -8,6 +8,7 @@ import sys
 img_path = Path(r'/data/active/atschan/20210930_dummy/MIP/')
 illcorr_path = Path(r'/data/active/atschan/illumination_correction/')
 output_path = Path(r'/data/active/atschan/20210930_dummy/hdf5/')
+magnification = 40
 
 img_files = img_path.glob('*.tif')
 img_files = [fyle for fyle in img_files]
@@ -58,7 +59,7 @@ for channel in channel_data:
         compression='gzip', chunks=chunk, shuffle=True,
         fletcher32=True)
 
-    dataset.attrs.create(name="element_size_um", data=(1, 0.1625, 0.1625))
+    dataset.attrs.create(name="element_size_um", data=(1, 6.5/magnification, 6.5/magnification))
 
 
 file.close()
