@@ -9,7 +9,7 @@ from lca.utils import get_label_difference
 # user settings
 path_to_images = Path(r'/data/active/atschan/20210930_dummy/hdf5/')
 nuclei_diameter = 90
-cell_diameter = 200
+cell_diameter = 250
 
 nuclei_channel = 'sdcDAPIxmRFPm'
 cell_channel = 'sdcDAPIxmRFPm'
@@ -53,12 +53,12 @@ for idx, nuclei_image in enumerate(list(nuclei_images)):
 
     cell_image = cell_images[idx, :, :]
     cell_image = np.stack([cell_image, nuclei_image])
-    cells_masks, flows, styles, diams = model_nuc.eval(cell_image,
-                                                      channels=[0, 1],
-                                                      resample=True,
-                                                      diameter=cell_diameter,
-                                                      flow_threshold=flow_threshold,
-                                                      cellprob_threshold=cellprob_threshold)
+    cells_masks, flows, styles, diams = model_cells.eval(cell_image,
+                                                         channels=[1, 2],
+                                                         resample=True,
+                                                         diameter=cell_diameter,
+                                                         flow_threshold=flow_threshold,
+                                                         cellprob_threshold=cellprob_threshold)
 
     # relabel for safety
     nuclei[idx, :, :] = label(nuclear_masks).astype('uint16')

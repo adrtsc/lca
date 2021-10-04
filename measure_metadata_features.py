@@ -9,6 +9,8 @@ import numpy as np
 # set paths
 path_to_images = Path(r"Z:\20210930_dummy\hdf5")
 path_to_features = Path(r"Z:\20210930_dummy\features")
+path_to_images = Path(r'/data/active/atschan/20210930_dummy/hdf5/')
+path_to_features = Path(r'/data/active/atschan/20210930_dummy/features/')
 
 # define settings
 settings = {'nuclei': {'measure_morphology' : True,
@@ -113,34 +115,34 @@ for object_id, object in enumerate(settings.keys()):
 
         label_images = file['label_images/%s' % object][:]
 
-            for assigned_object in settings[object]['assigned_objects']:
+        for assigned_object in settings[object]['assigned_objects']:
 
-                md_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, assigned_object)))
-                fv_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, assigned_object)))
+            md_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, assigned_object)))
+            fv_assignment = pd.read_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, assigned_object)))
 
-                assigned_label_images = file['label_images/%s' % assigned_object][:]
+            assigned_label_images = file['label_images/%s' % assigned_object][:]
 
-                assigned_md = measure_assignment(assigned_label_images, label_images, md_assignment, md)
-                fv_assignment['unique_object_id'] = assigned_md['unique_object_id']
+            assigned_md = measure_assignment(assigned_label_images, label_images, md_assignment, md)
+            fv_assignment['unique_object_id'] = assigned_md['unique_object_id']
 
-                if settings[assigned_object]['aggregate'] == True:
-                    counts = fv_assignment.groupby('unique_object_id').size()
-                    fv_assignment = fv_assignment.groupby('unique_object_id').mean()
-                    fv_assignment['count'] = counts
+            if settings[assigned_object]['aggregate'] == True:
+                counts = fv_assignment.groupby('unique_object_id').size()
+                fv_assignment = fv_assignment.groupby('unique_object_id').mean()
+                fv_assignment['count'] = counts
 
-                else:
-                    fv_assignment = fv_assignment.set_index('unique_object_id')
+            else:
+                fv_assignment = fv_assignment.set_index('unique_object_id')
 
-                # rename the columns of dataframe to be assigned to another and join the dfs
-                fv_assignment.columns = [ t + '_%s' % assigned_object for t in list(fv_assignment.keys())]
+            # rename the columns of dataframe to be assigned to another and join the dfs
+            fv_assignment.columns = [ t + '_%s' % assigned_object for t in list(fv_assignment.keys())]
 
-                fv = fv.join(fv_assignment)
+            fv = fv.join(fv_assignment)
 
-                # check if assigned object was tracked and add track id if it was
-                if hasattr(md_assignment, 'track_id'):
-                    md['track_id_%s' % assigned_object] = md_assignment['track_id']
+            # check if assigned object was tracked and add track id if it was
+            if hasattr(md_assignment, 'track_id'):
+                md['track_id_%s' % assigned_object] = md_assignment['track_id']
 
-            fv.to_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
-            md.to_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
+        fv.to_csv(path_to_features.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+        md.to_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
     else:
         pass
