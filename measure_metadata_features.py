@@ -95,8 +95,8 @@ for object_id, object in enumerate(settings.keys()):
     if object_settings['measure_tracks'] == True:
 
         # track the objects in the dataframe and add the tracks to the metadata
-        tracks = measure_tracks(md).set_index('unique_object_id')
-        md = md.join(tracks)
+        tracks = measure_tracks(md)
+        md = md.join(tracks.set_index('unique_object_id'))
 
     # save metadata and feature values for this site
     md.to_csv(path_to_features.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
