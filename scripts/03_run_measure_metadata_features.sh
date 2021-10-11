@@ -8,7 +8,7 @@
 #
 
 ### use (max) 2000 MB of memory per CPU
-#SBATCH --mem-per-cpu=2000m
+#SBATCH --mem-per-cpu=5000m
 
 ### use (max) 2000 MB of memory per CPU
 #SBATCH --cpus-per-task=1

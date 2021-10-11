@@ -315,7 +315,10 @@ class LapTracker():
               self.number_of_segment_middlepoints)))
 
         self.global_costs = np.array(self.global_costs)
-        termination_cost = np.quantile(self.global_costs, self.cost_factor)
+        if self.global_costs.size > 0:
+            termination_cost = np.quantile(self.global_costs, self.cost_factor)
+        else:
+            termination_cost = 1
 
         termination_matrix.setdiag(termination_cost)
 

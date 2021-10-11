@@ -3,14 +3,21 @@ import numpy as np
 from pathlib import Path
 from skimage import io
 import re
+import yaml
 import sys
 
-img_path = Path(r'/data/active/atschan/20210930_dummy/MIP/')
-illcorr_path = Path(r'/data/active/atschan/illumination_correction/')
-output_path = Path(r'/data/active/atschan/20210930_dummy/hdf5/')
-magnification = 40
+# load settings
 
-img_files = img_path.glob('*.tif')
+with open('settings/20210930_cluster_settings.yml', 'r') as stream:
+    settings = yaml.safe_load(stream)
+
+img_path = Path(settings['paths']['img_path'])
+illcorr_path = Path(settings['paths']['illcorr_path'])
+output_path = Path(settings['paths']['hdf5_path'])
+magnification = settings['magnification']
+file_extension = settings['file_extension']
+
+img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 sites = np.unique([int(re.search("(?<=_s)[0-9]{1,}", str(fyle)).group(0)) for fyle in img_files])
 channel_names = np.unique([re.search("(?<=_w[0-9])[^\W_]+(?=_s)", str(fyle)).group(0) for fyle in img_files])
@@ -31,13 +38,16 @@ for fyle in illcorr_files:
 
 
 # iterate over channels and timepoints and save into dataset
-site_files = img_path.glob('*_s%d_t[0-9].tif' % site)
+site_files = img_path.glob('*_s%d_t[0-9].%s' % (site, file_extension))
 channel_data = {key: [] for key in channel_names}
 
 for fyle in site_files:
     for channel in channel_data:
         if channel in str(fyle):
-            img = io.imread(fyle, plugin="tifffile")
+            if file_extension == 'tif':
+                img = io.imread(fyle, plugin="tifffile")
+            else:
+                img = io.imread(fyle)
             #corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
             corrected_image = img
             channel_data[channel].append(corrected_image)
@@ -55,9 +65,9 @@ for channel in channel_data:
     # Create a dataset in the file
     dataset = grp.create_dataset(
         channel, np.shape(np.squeeze(np.stack(channel_data[channel]))),
-        h5py.h5t.STD_U16BE, data=np.stack(channel_data[channel]),
+        data=np.stack(channel_data[channel]),
         compression='gzip', chunks=chunk, shuffle=True,
-        fletcher32=True)
+        fletcher32=True, dtype='uint16')
 
     dataset.attrs.create(name="element_size_um", data=(1, 6.5/magnification, 6.5/magnification))
 

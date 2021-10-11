@@ -1,0 +1,64 @@
+file_extension: tif
+magnification: 40
+objects:
+  cells:
+    assigned_objects:
+    - nuclei
+    - cytoplasm
+    measure_blobs:
+      channels:
+      - sdcDAPIxmRFPm
+      settings:
+        exclude_border: true
+        max_sigma: 10
+        min_sigma: 2
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.00015
+    measure_intensity:
+    - sdcGFP
+    - sdcDAPIxmRFPm
+    measure_morphology: true
+    measure_tracks: true
+    segmentation_channel: sdcDAPIxmRFPm
+  cytoplasm:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+      - sdcDAPIxmRFPm
+      settings:
+        exclude_border: true
+        max_sigma: 10
+        min_sigma: 2
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.00015
+    measure_intensity:
+    - sdcGFP
+    - sdcDAPIxmRFPm
+    measure_morphology: true
+    measure_tracks: false
+  nuclei:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+      - sdcGFP
+      settings:
+        exclude_border: true
+        max_sigma: 10
+        min_sigma: 2
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.00015
+    measure_intensity:
+    - sdcGFP
+    - sdcDAPIxmRFPm
+    measure_morphology: true
+    measure_tracks: true
+    segmentation_channel: sdcDAPIxmRFPm
+paths:
+  feature_path: /data/active/atschan/20210930_dummy/features/
+  hdf5_path: /data/active/atschan/20210930_dummy/hdf5/
+  illcorr_path: /data/active/atschan/illumination_correction/
+  img_path: /data/active/atschan/20210930_dummy/MIP/
+  temp_seg_path: /data/active/atschan/20210930_dummy/temp_segmentations/
