@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def measure_border_cells(feature_values):
     # check which cells are border cells
     border_1 = feature_values['bbox-0'] == 0
@@ -11,6 +10,3 @@ def measure_border_cells(feature_values):
     borders = np.array(borders, dtype=int)
 
     return borders
-
-
-

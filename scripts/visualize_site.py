@@ -34,9 +34,9 @@ def visualize_site(settings, site, intensities=True, labels=True, boundaries=Tru
         # add tracks
         for object in file['label_images'].keys():
             try:
-                md = pd.read_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
-                if hasattr(md, 'track_id'):
-                    tracks = md[['track_id', 'timepoint', 'centroid-0', 'centroid-1']].astype('uint16')
+                fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+                if hasattr(fv, 'track_id'):
+                    tracks = fv[['track_id', 'timepoint', 'centroid-0', 'centroid-1']].astype('uint16')
                     viewer.add_tracks(tracks, name='tracks_%s' % object)
             except:
                 pass
@@ -60,4 +60,4 @@ def visualize_site(settings, site, intensities=True, labels=True, boundaries=Tru
 with open('scripts/settings/20210930_settings.yml', 'r') as stream:
     settings = yaml.safe_load(stream)
 
-visualize_site(settings, 1, labels=False)
+visualize_site(settings, 2)

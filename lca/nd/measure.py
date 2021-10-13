@@ -6,22 +6,10 @@ from skimage.feature import blob_log
 from skimage.draw import disk
 
 
-
-def measure_metadata_2D(label_image):
-
-    features = ('label', 'bbox', 'centroid')
-    regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image, properties=features))
-
-    # assess which objects touch the border
-    regionprops['is_border'] = measure_border_cells(regionprops)
-
-    return regionprops
-
-
 def measure_morphology_2D(label_image):
 
     # measure regionprops for each timepoint
-    features = ('area', 'bbox', 'bbox_area', 'centroid',
+    features = ('label', 'area', 'bbox', 'bbox_area', 'centroid',
                 'convex_area', 'eccentricity', 'equivalent_diameter',
                 'euler_number', 'extent', 'major_axis_length',
                 'minor_axis_length', 'moments', 'moments_central',
@@ -35,7 +23,7 @@ def measure_morphology_2D(label_image):
 
 def measure_intensity_2D(label_image, intensity_image):
 
-    features = ('max_intensity', 'mean_intensity', 'min_intensity')
+    features = ('label', 'max_intensity', 'mean_intensity', 'min_intensity')
     regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image,
                                                                  intensity_image=intensity_image,
                                                                  properties=features))
@@ -112,6 +100,10 @@ def measure_blobs_2D(intensity_image,
     blobs['var_intensity'] = var_intensity
     blobs['mean_background_intensity'] = mean_bg_intensity
     blobs['SNR'] = np.array(mean_intensity) / np.array(mean_bg_intensity)
+
+    # adjust size to represent diameter rather than sigma
+
+    blobs['size'] = blobs['size']*np.sqrt(2)*2
 
     return blobs
 

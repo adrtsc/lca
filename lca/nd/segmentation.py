@@ -1,13 +1,16 @@
 from cellpose import models
 import scipy.ndimage as ndi
+import numpy as np
 from skimage.measure import label
 
+
+
 def segment_nuclei_cellpose(intensity_image, diameter, resample=True, flow_threshold=0.4,
-                            cellprob_threshold=0, gpu=True, torch=False, filter=True):
+                            cellprob_threshold=0, gpu=False, torch=False, apply_filter=True):
 
     model = models.Cellpose(gpu=gpu, torch=torch, model_type="nuclei")
 
-    if filter:
+    if apply_filter:
         intensity_image = ndi.median_filter(intensity_image, 10)
 
     label_image, flows, styles, diams = model.eval(intensity_image,
@@ -21,12 +24,13 @@ def segment_nuclei_cellpose(intensity_image, diameter, resample=True, flow_thres
 
     return label_image
 
+
 def segment_cells_cellpose(cells_intensity_image, nuclei_intensity_image,  diameter, resample=True, flow_threshold=0.4,
-                           cellprob_threshold=0, gpu=False, torch=False, filter=True):
+                           cellprob_threshold=0, gpu=False, torch=False, apply_filter=True):
 
     model = models.Cellpose(gpu=gpu, torch=torch, model_type="cyto2")
 
-    if filter:
+    if apply_filter:
         cells_intensity_image = ndi.median_filter(cells_intensity_image, 10)
         nuclei_intensity_image = ndi.median_filter(nuclei_intensity_image, 10)
 

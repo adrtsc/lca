@@ -6,7 +6,8 @@ objects:
     - nuclei
     - cytoplasm
     measure_blobs:
-      channels: sdcDAPIxmRFPm
+      channels:
+      - sdcDAPIxmRFPm
       settings:
         exclude_border: true
         max_sigma: 10
@@ -23,7 +24,15 @@ objects:
   cytoplasm:
     assigned_objects: []
     measure_blobs:
-    - sdcDAPIxmRFPm
+      channels:
+      - sdcDAPIxmRFPm
+      settings:
+        exclude_border: true
+        max_sigma: 10
+        min_sigma: 2
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.00015
     measure_intensity:
     - sdcGFP
     - sdcDAPIxmRFPm
@@ -32,7 +41,8 @@ objects:
   nuclei:
     assigned_objects: []
     measure_blobs:
-      channels: sdcGFP
+      channels:
+      - sdcGFP
       settings:
         exclude_border: true
         max_sigma: 10

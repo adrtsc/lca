@@ -18,4 +18,4 @@
 
 n="$SLURM_ARRAY_TASK_ID"
 
-exec python -u measure_metadata_features.py $n
+exec python -u measure_features.py $n
