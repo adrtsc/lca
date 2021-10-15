@@ -3,14 +3,19 @@ import numpy as np
 from pathlib import Path
 from skimage import io
 import re
+import cv2
 import yaml
 import sys
 
-# load settings
+# define the site this job should process
+site = int(sys.argv[1])
 
-with open('settings/20210930_cluster_settings.yml', 'r') as stream:
+# load settings
+settings_path = Path(sys.argv[2])
+with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
+# get all paths from settings
 img_path = Path(settings['paths']['img_path'])
 illcorr_path = Path(settings['paths']['illcorr_path'])
 output_path = Path(settings['paths']['hdf5_path'])
@@ -22,13 +27,10 @@ img_files = [fyle for fyle in img_files]
 sites = np.unique([int(re.search("(?<=_s)[0-9]{1,}", str(fyle)).group(0)) for fyle in img_files])
 channel_names = np.unique([re.search("(?<=_w[0-9])[^\W_]+(?=_s)", str(fyle)).group(0) for fyle in img_files])
 
-# define the site this job should process
-site = int(sys.argv[1])
 
 # pre-load the illumination correction files:
-
 illum_corr = {key: [] for key in channel_names}
-illcorr_files = illcorr_path.glob('*.png')
+illcorr_files = sorted(illcorr_path.glob('*.png'))
 
 for fyle in illcorr_files:
     for channel in channel_names:
@@ -38,7 +40,7 @@ for fyle in illcorr_files:
 
 
 # iterate over channels and timepoints and save into dataset
-site_files = img_path.glob('*_s%d_t[0-9].%s' % (site, file_extension))
+site_files = sorted(img_path.glob('*_s%d_t[0-9].%s' % (site, file_extension)))
 channel_data = {key: [] for key in channel_names}
 
 for fyle in site_files:
@@ -48,9 +50,9 @@ for fyle in site_files:
                 img = io.imread(fyle, plugin="tifffile")
             else:
                 img = io.imread(fyle)
-            #corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
-            corrected_image = img
-            channel_data[channel].append(corrected_image)
+            corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
+            #corrected_image = img
+            channel_data[channel].append(corrected_image.astype('uint16'))
 
 # Open the experiment HDF5 file in "append" mode
 
@@ -73,3 +75,4 @@ for channel in channel_data:
 
 
 file.close()
+

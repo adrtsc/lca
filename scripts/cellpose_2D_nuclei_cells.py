@@ -7,14 +7,18 @@ from lca.ndt.segmentation import segment_nuclei_cellpose_2DT, segment_cells_cell
 from lca.nd.util import get_label_difference_2D
 from lca.ndt.util import find_boundaries_2DT
 
+# define the site this job should process
+site = int(sys.argv[1])
+
 # load settings
-with open('settings/20210930_cluster_settings.yml', 'r') as stream:
+settings_path = Path(sys.argv[2])
+with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
 hdf5_path = Path(settings['paths']['hdf5_path'])
 
-nuclei_diameter = 2.5*settings['magnification']
-cell_diameter = 4*settings['magnification']
+nuclei_diameter = 3*settings['magnification']
+cell_diameter = 5*settings['magnification']
 
 nuclei_channel = settings['objects']['nuclei']['segmentation_channel']
 cell_channel = settings['objects']['cells']['segmentation_channel']
@@ -23,8 +27,6 @@ cell_channel = settings['objects']['cells']['segmentation_channel']
 # end of user settings - no need to change anything beyond this point
 ##############################################################################
 
-# define the site this job should process
-site = int(sys.argv[1])
 
 # open the hdf5 file corresponding to this site
 file = h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "a")

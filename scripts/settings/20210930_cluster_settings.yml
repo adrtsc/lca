@@ -1,4 +1,10 @@
-file_extension: tif
+channel_colors:
+  sdcCy5: magenta
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590: red
+  sdcYFP: yellow
+file_extenstion: tif
 magnification: 40
 objects:
   cells:
@@ -57,8 +63,8 @@ objects:
     measure_tracks: true
     segmentation_channel: sdcDAPIxmRFPm
 paths:
-  feature_path: /data/active/atschan/20210930_dummy/features/
-  hdf5_path: /data/active/atschan/20210930_dummy/hdf5/
-  illcorr_path: /data/active/atschan/illumination_correction/
-  img_path: /data/active/atschan/20210930_dummy/MIP/
-  temp_seg_path: /data/active/atschan/20210930_dummy/temp_segmentations/
+  feature_path: /data/active/atschan/20210930_dummy/features
+  hdf5_path: /data/active/atschan/20210930_dummy/hdf5
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: /data/active/atschan/20210930_dummy/MIP
+  temp_seg_path: /data/active/atschan/20210930_dummy/temp_segmentation

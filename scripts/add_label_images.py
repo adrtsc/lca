@@ -7,16 +7,17 @@ import h5py
 import numpy as np
 import re
 
+# define the site this job should process
+site = int(sys.argv[1])
+
 # load settings
-with open('settings/20210930_cluster_settings.yml', 'r') as stream:
+settings_path = Path(sys.argv[2])
+with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
 hdf5_path = Path(settings['paths']['hdf5_path'])
 temp_seg_path = Path(settings['paths']['temp_seg_path'])
 file_extension = settings['file_extension']
-
-# define the site this job should process
-site = int(sys.argv[1])
 
 img_files = temp_seg_path.glob('*_s%s.%s' % (site, file_extension))
 objects = np.unique([re.search("[^\W]+(?=_s%s.%s)" % (site, file_extension), str(fyle)).group(0) for fyle in img_files])

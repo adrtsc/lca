@@ -1,3 +1,9 @@
+channel_colors:
+  sdcCy5: magenta
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590: red
+  sdcYFP: yellow
 file_extension: tif
 magnification: 40
 objects:

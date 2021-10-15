@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from functools import reduce
 from lca.ndt.measure import measure_morphology_2DT, measure_intensity_2DT, measure_blobs_2DT, measure_tracks_2DT
 from lca.ndt.util import measure_assignment_2DT
 import warnings
@@ -30,14 +29,14 @@ def extract_features(file, settings, site):
                 intensity_images = file['intensity_images'][channel][:]
 
                 c_intensity_features = measure_intensity_2DT(label_images, intensity_images)
+                c_intensity_features = c_intensity_features.set_index(['label', 'timepoint'])
+                c_intensity_features.columns = ['%s_%s' % (key, channel) for key in c_intensity_features.columns]
+                c_intensity_features = c_intensity_features.reset_index()
+
                 intensity_features.append(c_intensity_features)
 
-            suffixes = ['_%s' % channel for channel in object_settings['measure_intensity']]
-            intensity_features = reduce(lambda df1, df2:
-                                        pd.merge(df1, df2, on=('label', 'timepoint'),
-                                                 suffixes=suffixes), intensity_features)
-
-            fv.append(intensity_features)
+            intensity_features = [feature.set_index(['label', 'timepoint']) for feature in intensity_features]
+            fv.append(pd.concat(intensity_features, axis=1).reset_index())
 
         fv = [feature.set_index(['label', 'timepoint']) for feature in fv]
         fv = pd.concat(fv, axis=1).reset_index()
@@ -107,7 +106,7 @@ def assign_and_aggregate(file, settings, site):
                     assigned_object, object))
                     counts = fv_assignment.groupby('unique_object_id').size()
                     fv_assignment = fv_assignment.groupby('unique_object_id').mean()
-                    fv_assignment['count_%s' % assigned_object] = counts
+                    fv_assignment['count'] = counts
 
                     '''
                     aggregating the fv will have some negative effects - for example the track id will be a 
@@ -120,9 +119,11 @@ def assign_and_aggregate(file, settings, site):
                 If yes -> how='outer' If no, leave default value. Keeping them for now.
                 '''
                 # merge the dfs while renaming according to the assigned object
-                fv = fv.merge(fv_assignment, on=['unique_object_id', 'timepoint'],
-                              suffixes=['', '_%s' % assigned_object],
-                              how='outer')
+
+                fv_assignment = fv_assignment.reset_index().set_index(['unique_object_id', 'timepoint'])
+                fv_assignment.columns = ['%s_%s' % (key, assigned_object) for key in fv_assignment.columns]
+                fv_assignment = fv_assignment.reset_index()
+                fv = fv.merge(fv_assignment, on=['unique_object_id', 'timepoint'], how='outer')
 
 
             # reset index and save

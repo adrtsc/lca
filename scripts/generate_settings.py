@@ -49,7 +49,12 @@ settings = {'paths': {'img_path': img_path,
                                                                    'overlap': 0.5,
                                                                    'exclude_border': True}},
                                     'measure_tracks': False,
-                                    'assigned_objects': []}}}
+                                    'assigned_objects': []}},
+            'channel_colors': {'sdcDAPIxmRFPm': 'blue',
+                               'sdcGFP': 'green',
+                               'sdcYFP': 'yellow',
+                               'sdcRFP590': 'red',
+                               'sdcCy5': 'magenta'}}
 
 
 with open('scripts/settings/20210930_cluster_settings.yml', 'w') as outfile:

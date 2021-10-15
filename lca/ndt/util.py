@@ -11,8 +11,6 @@ def measure_assignment_2DT(label_images, assigned_label_images, fv, fv_assignmen
         current_fv = fv.loc[fv['timepoint'] == idx]
         assigned_label_image = assigned_label_images[idx, :, :]
         assigned_label = get_parent_labels_2D(assigned_label_image, label_image)
-        print(len(assigned_label))
-
         assigned_unique_object_id = []
 
         for assignment in assigned_label:
