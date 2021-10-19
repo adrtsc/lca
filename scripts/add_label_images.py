@@ -22,24 +22,25 @@ file_extension = settings['file_extension']
 img_files = temp_seg_path.glob('*_s%s.%s' % (site, file_extension))
 objects = np.unique([re.search("[^\W]+(?=_s%s.%s)" % (site, file_extension), str(fyle)).group(0) for fyle in img_files])
 
-file = h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "a")
-element_size_um = file['intensity_images/%s' % list(file['intensity_images'].keys())[0]].attrs.get('element_size_um')
-chunk = element_size_um = file['intensity_images/%s' % list(file['intensity_images'].keys())[0]].chunks
+with h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "a") as file:
 
-for object in objects:
+    element_size_um = file['intensity_images/%s' % list(file['intensity_images'].keys())[0]].attrs.get('element_size_um')
+    chunk = element_size_um = file['intensity_images/%s' % list(file['intensity_images'].keys())[0]].chunks
 
-    label_images = io.imread(temp_seg_path.joinpath(object + '_s%s.%s' % (site, file_extension)), plugin="tifffile")
+    for object in objects:
 
-    # Create a dataset in the file to add label images
-    dataset = file['label_images'].create_dataset(object, np.shape(label_images), h5py.h5t.STD_U16BE, data=label_images,
-                                 compression='gzip', chunks=chunk, shuffle=True, fletcher32=True)
+        label_images = io.imread(temp_seg_path.joinpath(object + '_s%s.%s' % (site, file_extension)), plugin="tifffile")
 
-    dataset.attrs.create(name="element_size_um", data=element_size_um)
+        # Create a dataset in the file to add label images
+        dataset = file['label_images'].create_dataset(object, np.shape(label_images), h5py.h5t.STD_U16BE, data=label_images,
+                                     compression='gzip', chunks=chunk, shuffle=True, fletcher32=True)
 
-    # Create a dataset in the file to add boundaries
-    boundaries = find_boundaries(label_images)
-    dataset = file['boundary_images'].create_dataset('%s_boundaries' % object, np.shape(label_images), h5py.h5t.STD_U16BE,
-                                                     data=boundaries, compression='gzip', chunks=chunk,
-                                                     shuffle=True, fletcher32=True)
+        dataset.attrs.create(name="element_size_um", data=element_size_um)
 
-    dataset.attrs.create(name="element_size_um", data=element_size_um)
+        # Create a dataset in the file to add boundaries
+        boundaries = find_boundaries(label_images)
+        dataset = file['boundary_images'].create_dataset('%s_boundaries' % object, np.shape(label_images), h5py.h5t.STD_U16BE,
+                                                         data=boundaries, compression='gzip', chunks=chunk,
+                                                         shuffle=True, fletcher32=True)
+
+        dataset.attrs.create(name="element_size_um", data=element_size_um)

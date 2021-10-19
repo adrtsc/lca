@@ -1,0 +1,19 @@
+numpy
+pandas
+scipy>=1.4.1
+networkx
+scikit-image
+progress
+cellpose[all]
+cellpose-napari
+scikit-learn
+h5py
+imageio
+matplotlib
+progress
+scipy
+sklearn
+pyyaml
+napari-feature-visualization@ git+https://github.com/adrtsc/napari-feature-visualization
+napari-blob-detection@ git+https://github.com/adrtsc/napari-blob-detection
+sslap@ git+https://github.com/OllieBoyne/sslap

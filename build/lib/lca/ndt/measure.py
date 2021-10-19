@@ -61,10 +61,10 @@ def measure_blobs_2DT(intensity_images,
     return blobs
 
 
-def measure_tracks_2DT(dataframe, max_distance, time_window, max_split_distance, max_gap_closing_distance):
+def measure_tracks_2DT(dataframe):
 
-    tracker = LapTracker(max_distance=max_distance, time_window=time_window, max_split_distance=max_split_distance,
-                         max_gap_closing_distance=max_gap_closing_distance)
+    tracker = LapTracker(max_distance=30, time_window=3, max_split_distance=100,
+                         max_gap_closing_distance=100)
 
     columns = ['centroid-0', 'centroid-1', 'timepoint', 'label']
     dataframe['track_id'] = tracker.track_df(dataframe, identifiers=columns)

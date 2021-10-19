@@ -2,7 +2,6 @@ from cellpose import models
 import scipy.ndimage as ndi
 import numpy as np
 from skimage.measure import label
-from skimage.morphology import remove_small_objects
 
 
 
@@ -20,10 +19,6 @@ def segment_nuclei_cellpose(intensity_image, diameter, resample=True, flow_thres
                                                    diameter=diameter,
                                                    flow_threshold=flow_threshold,
                                                    cellprob_threshold=cellprob_threshold)
-
-    # remove small artifacts
-    label_image = remove_small_objects(label_image, 2500)
-
     # relabel for safety
     label_image = label(label_image).astype('uint16')
 
@@ -47,9 +42,6 @@ def segment_cells_cellpose(cells_intensity_image, nuclei_intensity_image,  diame
                                                    diameter=diameter,
                                                    flow_threshold=flow_threshold,
                                                    cellprob_threshold=cellprob_threshold)
-
-    # remove small artifacts
-    label_image = remove_small_objects(label_image, 2500)
 
     # relabel for safety
     label_image = label(label_image).astype('uint16')

@@ -16,7 +16,8 @@ with open(settings_path, 'r') as stream:
 hdf5_path = Path(settings['paths']['hdf5_path'])
 
 # load hdf5 file of site
-file = h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "r")
+with h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "r") as file:
 
-# extract metadata and features
-top_level_features.main(file, settings)
+    # extract metadata and features
+    top_level_features.main(file, settings)
+

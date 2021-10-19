@@ -1,6 +1,9 @@
 import numpy as np
+import warnings
+import skimage.measure
 from lca.nd.util import get_parent_labels_2D
-from skimage.segmentation import find_boundaries
+import pandas as pd
+import skimage
 
 def measure_assignment_2DT(label_images, assigned_label_images, fv, fv_assignment):
 
@@ -31,12 +34,32 @@ def measure_assignment_2DT(label_images, assigned_label_images, fv, fv_assignmen
     return fv_assignment
 
 
-def find_boundaries_2DT(label_images):
+def get_parent_labels_2DT(label_images, parent_label_images):
 
-    boundaries = np.zeros(np.shape(label_images))
+    parent_labels = []
 
-    for idx, lbl in enumerate(list(label_images)):
-        cb = find_boundaries(lbl)
-        boundaries[idx, :, :] = cb
+    for idx, label_image in enumerate(label_images):
 
-    return boundaries
+        parent_label_image = parent_label_images[idx, :, :]
+        centroids = pd.DataFrame(skimage.measure.regionprops_table(label_image, properties=('label', 'centroid')))
+        assigned_labels = []
+
+        for id, label in centroids.iterrows():
+
+            assigned_label = parent_label_image[int(label['centroid-0']), int(label['centroid-1'])]
+
+            if assigned_label == 0:
+                warnings.warn('object to be assigned is not contained in any object in second label image and will be lost in the aggregated dataframe')
+                assigned_labels.append(np.nan)
+            elif assigned_label > 0:
+                assigned_labels.append(assigned_label)
+
+        assigned_labels = pd.DataFrame({'label': centroids['label'],
+                                        'timepoint': idx,
+                                        'parent_label': assigned_labels})
+        parent_labels.append(assigned_labels)
+
+    parent_labels = pd.concat(parent_labels)
+
+    return parent_labels
+

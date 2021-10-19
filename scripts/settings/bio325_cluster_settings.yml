@@ -6,6 +6,12 @@ channel_colors:
   sdcYFP: yellow
 file_extension: tif
 magnification: 60
+cellpose:
+  nuclei_diameter: 300
+  cells_diameter: 400
+  resample: false
+  cellprob_threshold: -1.18
+  flow_threshold: 11.91
 objects:
   cells:
     assigned_objects:
@@ -16,7 +22,11 @@ objects:
     - sdcGFP
     - sdcDAPIxmRFPm
     measure_morphology: true
-    measure_tracks: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 170
+      max_gap_closing_distance: 170
     segmentation_channel: sdcCy5
   cytoplasm:
     assigned_objects: []
