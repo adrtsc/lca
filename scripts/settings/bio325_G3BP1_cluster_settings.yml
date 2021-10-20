@@ -1,0 +1,35 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590: magenta
+  sdcYFP: yellow
+file_extension: tif
+magnification: 60
+cellpose:
+  nuclei_diameter: 300
+  cells_diameter: 400
+  resample: false
+  cellprob_threshold: -1.18
+  flow_threshold: 11.91
+objects:
+  cells:
+    assigned_objects: []
+    measure_blobs: true
+    measure_intensity:
+    - sdcGFP
+    - sdcCy5
+    measure_morphology: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 170
+      max_gap_closing_distance: 170
+    segmentation_channel: sdcCy5
+paths:
+  feature_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/features
+  hdf5_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/hdf5
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/
+  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
+

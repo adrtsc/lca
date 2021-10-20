@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 from lca.ndt.measure import measure_morphology_2DT, measure_intensity_2DT, measure_blobs_2DT, measure_tracks_2DT
 from lca.ndt.util import measure_assignment_2DT
+from lca.util import measure_border_cells
 import warnings
 
 def extract_features(file, settings, site):
@@ -58,6 +59,7 @@ def extract_features(file, settings, site):
                 blob_count = blobs.groupby(['label', 'timepoint']).size()
 
                 fv = fv.merge(blob_count.rename('blob_count_%s' % channel), on=['label', 'timepoint'], how='outer')
+                fv['blob_count_%s' % channel].fillna(0, inplace=True)
                 
 
         # if object needs to be tracked across time, add track id
@@ -72,6 +74,9 @@ def extract_features(file, settings, site):
         # add unique_object_id
         unique_object_id = np.arange(0, len(fv)) + ((site - 1) * len(settings.keys()) * 1000000) + 1000000 * object_id
         fv['unique_object_id'] = unique_object_id
+
+        # measure if object touches the border
+        fv['is_border'] = measure_border_cells(fv)
 
         # save  feature values for this site
         fv = fv.set_index(['unique_object_id', 'timepoint'])

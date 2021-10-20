@@ -19,6 +19,7 @@ from scipy.spatial import cKDTree
 from sslap import auction_solve
 from scipy.sparse import lil_matrix
 from scipy.sparse import coo_matrix
+from numpy.random import uniform
 
 
 def load_tracker(path_to_tracker):
@@ -590,7 +591,7 @@ class LapTracker():
         self.segment_row_index = row_ind
         self.segment_col_index = col_ind
 
-    def track_df(self, df, identifiers):
+    def track_df(self, df, identifiers, modulate_centroids=True):
         """
         Tracks the objects in df
         Assigns 3 additional columns to df
@@ -603,6 +604,10 @@ class LapTracker():
         identifiers : list
             list of column names for coordinates in df and label column
             (e.g. ['x_coord', 'y_coord', 'timepoint', 'labels'])
+        modulate_centroids: Boolean
+            whether centroids should be slightly shifted for each timepoint. This is needed in case the segmentations
+            stay constant across timepoints - otherwise the distance between their centroids will be NaN, which messes
+            up the tracking.
         """
         self.df = df.copy()
         self.identifiers = identifiers
@@ -610,6 +615,11 @@ class LapTracker():
         self.number_of_timepoints = np.max(np.unique(df[identifiers[2]]))
         self.adjacency_matrix = lil_matrix((self.number_of_objects,
                                             self.number_of_objects))
+
+        if modulate_centroids:
+            # modulate centroids
+            self.df['centroid-0'] = self.df['centroid-0'] + uniform(size=len(self.df))
+            self.df['centroid-1'] = self.df['centroid-1'] + uniform(size=len(self.df))
         # add unique identifiers to df
         self.df['unique_id'] = list(range(0, self.number_of_objects))
         # link timepoints to get segments
@@ -737,7 +747,7 @@ class LapTracker():
         nx.draw_kamada_kawai(subgraph, with_labels=True)
 
     def track_label_images(self, label_stack, intensity_stack=None,
-                           intensity_weight=2):
+                           intensity_weight=2, modulate_centroids=True):
         '''
         Tracks objects in label images over timepoints
         Takes a 3D numpy array (t, x, y) with labelled objects and tries
@@ -760,10 +770,12 @@ class LapTracker():
         self.number_of_timepoints = np.size(label_stack, 0)
         df = self.localize_objects(label_stack, intensity_stack)
         # track the objects in the df
-        self.track_df(df,
-                      ['centroid-0', 'centroid-1', 'timepoint', 'label'])
+        df['track_id'] = self.track_df(df, ['centroid-0', 'centroid-1', 'timepoint', 'label'],
+                                       modulate_centroids=modulate_centroids)
         # relabel the movie according to the track id
         self.relabeled_movie = self.__switch_labels(label_stack)
+
+        return self.relabeled_movie, df
 
     def save(self, path_to_tracker):
         '''
