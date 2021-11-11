@@ -8,20 +8,17 @@ file_extension: tif
 magnification: 60
 cellpose:
   nuclei:
-    diameter: 220
+    diameter: 200
     resample: false
     cellprob_threshold: -1.18
     flow_threshold: 11.89
-    min_size: 2500
     channel: sdcDAPIxmRFPm
   cells:
-    model: cyto
-    diameter: 400
+    diameter: 200
     resample: false
-    cellprob_threshold: -1.04
-    flow_threshold: 11.48
-    min_size: 35000
-    channel: sdcGFP
+    cellprob_threshold: -0.71
+    flow_threshold: 26
+    channel: sdcCy5
     nuclei_channel: sdcDAPIxmRFPm
   cytoplasm: true
 objects:
@@ -29,7 +26,6 @@ objects:
     assigned_objects:
     - nuclei
     - cytoplasm
-    - cytoplasm_eroded
     measure_blobs: false
     measure_intensity:
     - sdcGFP
@@ -58,13 +54,6 @@ objects:
     - sdcGFP
     measure_morphology: true
     measure_tracks: false
-  cytoplasm_eroded:
-    assigned_objects: [ ]
-    measure_blobs: false
-    measure_intensity:
-      - sdcGFP
-    measure_morphology: true
-    measure_tracks: false
   nuclei:
     assigned_objects: []
     measure_blobs: false
@@ -74,8 +63,8 @@ objects:
     measure_morphology: true
     measure_tracks: false
 paths:
-  feature_path: /data/active/BIO325_group1/20211028_Bio325_Sec16/features
-  hdf5_path: /data/active/BIO325_group1/20211028_Bio325_Sec16/hdf5
+  feature_path: /data/active/BIO325_group1/20211018_Sec16/features
+  hdf5_path: /data/active/BIO325_group1/20211018_Sec16/hdf5
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: /data/active/BIO325_group1/20211028_Bio325_Sec16/MIP
+  img_path: /data/active/BIO325_group1/20211018_Sec16/MIP/
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

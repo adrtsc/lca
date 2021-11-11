@@ -8,24 +8,22 @@ file_extension: tif
 magnification: 60
 cellpose:
   cells:
-    model: cyto2
     diameter: 160
     resample: false
     cellprob_threshold: 0.94
     flow_threshold: 26
-    min_size: 2500
     channel: sdcCy5
     nuclei_channel: false
   cytoplasm: false
 objects:
   cells:
-    assigned_objects: [cells_eroded]
+    assigned_objects: [cells_eroded, cells_eroded_2]
     measure_blobs:
       channels:
       - sdcGFP
       settings:
         exclude_border: true
-        max_sigma: 5
+        max_sigma: 4
         min_sigma: 1
         num_sigma: 10
         overlap: 0.5
@@ -39,19 +37,26 @@ objects:
       time_window: 3
       max_split_distance: 125
       max_gap_closing_distance: 125
-      allow_splitting: false
+      allow_splitting: true
       allow_merging: false
   cells_eroded:
-    assigned_objects: []
+    assigned_objects: [ ]
+    measure_blobs: false
+    measure_intensity:
+      - sdcGFP
+    measure_morphology: true
+    measure_tracks: false
+  cells_eroded_2:
+    assigned_objects: [ ]
     measure_blobs: false
     measure_intensity:
       - sdcGFP
     measure_morphology: true
     measure_tracks: false
 paths:
-  feature_path: /data/active/BIO325_group1/20211027_Bio325_G3BP1/features
-  hdf5_path: /data/active/BIO325_group1/20211027_Bio325_G3BP1/hdf5
+  feature_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/features
+  hdf5_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/hdf5
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: /data/active/BIO325_group1/20211027_Bio325_G3BP1/MIP
+  img_path: /data/active/BIO325_group1/20211020_G3BP1/replicate_2/
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
 

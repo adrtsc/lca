@@ -1,4 +1,5 @@
 import pandas as pd
+from numpy.random import uniform
 from lca.ndt.LapTracker import LapTracker
 from lca.nd.measure import measure_morphology_2D, measure_intensity_2D, measure_blobs_2D
 
@@ -61,14 +62,22 @@ def measure_blobs_2DT(intensity_images,
     return blobs
 
 
-def measure_tracks_2DT(dataframe):
+def measure_tracks_2DT(df, max_distance,
+                       time_window,
+                       max_split_distance,
+                       max_gap_closing_distance,
+                       allow_splitting=True,
+                       allow_merging=False,
+                       modulate_centroids=True):
 
-    tracker = LapTracker(max_distance=30, time_window=3, max_split_distance=100,
-                         max_gap_closing_distance=100)
+    tracker = LapTracker(max_distance=max_distance, time_window=time_window, max_split_distance=max_split_distance,
+                         max_gap_closing_distance=max_gap_closing_distance, allow_splitting=allow_splitting,
+                         allow_merging=allow_merging)
+
 
     columns = ['centroid-0', 'centroid-1', 'timepoint', 'label']
-    dataframe['track_id'] = tracker.track_df(dataframe, identifiers=columns)
+    df['track_id'] = tracker.track_df(df, identifiers=columns, modulate_centroids=modulate_centroids)
 
-    return dataframe
+    return df
 
 

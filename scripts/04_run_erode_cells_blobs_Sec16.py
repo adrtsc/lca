@@ -10,13 +10,13 @@ SLURM_COMMAND = """#! /bin/sh
 #SBATCH --array=1-{0}
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
-#SBATCH --mem-per-cpu=2000m
+#SBATCH --mem-per-cpu=20000m
 #SBATCH --cpus-per-task=1
 #SBATCH --time=240
 
 n="$SLURM_ARRAY_TASK_ID"
 
-exec python add_label_images.py $n {1}
+exec python erode_cytoplasm_blobs_Sec16.py $n {1}
 """
 
 # load settings

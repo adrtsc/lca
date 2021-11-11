@@ -1,7 +1,8 @@
 import pandas as pd
-from numpy.random import uniform
 from lca.ndt.LapTracker import LapTracker
-from lca.nd.measure import measure_morphology_2D, measure_intensity_2D, measure_blobs_2D
+from lca.nd.measure import measure_morphology_2D
+from lca.nd.measure import measure_intensity_2D
+from lca.nd.measure import measure_blobs_2D
 
 
 def measure_morphology_2DT(label_images):
@@ -25,7 +26,8 @@ def measure_intensity_2DT(label_images, intensity_images):
 
     for idx, label_image in enumerate(list(label_images)):
         intensity_image = intensity_images[idx, :, :]
-        current_regionprops = measure_intensity_2D(label_image, intensity_image)
+        current_regionprops = measure_intensity_2D(label_image,
+                                                   intensity_image)
         current_regionprops['timepoint'] = idx
         regionprops.append(current_regionprops)
 
@@ -66,15 +68,19 @@ def measure_tracks_2DT(df, max_distance,
                        time_window,
                        max_split_distance,
                        max_gap_closing_distance,
+                       allow_splitting=True,
+                       allow_merging=False,
                        modulate_centroids=True):
 
-    tracker = LapTracker(max_distance=max_distance, time_window=time_window, max_split_distance=max_split_distance,
-                         max_gap_closing_distance=max_gap_closing_distance)
-
+    tracker = LapTracker(max_distance=max_distance,
+                         time_window=time_window,
+                         max_split_distance=max_split_distance,
+                         max_gap_closing_distance=max_gap_closing_distance,
+                         allow_splitting=allow_splitting,
+                         allow_merging=allow_merging)
 
     columns = ['centroid-0', 'centroid-1', 'timepoint', 'label']
-    df['track_id'] = tracker.track_df(df, identifiers=columns, modulate_centroids=modulate_centroids)
+    df['track_id'] = tracker.track_df(df, identifiers=columns,
+                                      modulate_centroids=modulate_centroids)
 
     return df
-
-

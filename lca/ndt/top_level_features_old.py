@@ -10,15 +10,15 @@ def extract_metadata_features(file, settings, site):
 
     feature_path = Path(settings['paths']['feature_path'])
 
-    for object_id, object in enumerate(settings['objects'].keys()):
+    for object_id, obj in enumerate(settings['objects'].keys()):
 
-        label_images = file['label_images/%s' % object][:]
-        object_settings = settings['objects'][object]
+        label_images = file['label_images/%s' % obj][:]
+        object_settings = settings['objects'][obj]
 
         # get metadata
         md = measure_metadata_2DT(label_images)
 
-        # define a unique identifier for every object, currently allows for 1000000 occurences per object per site
+        # define a unique identifier for every obj, currently allows for 1000000 occurences per obj per site
         unique_object_id = np.arange(0, len(md)) + ((site - 1) * len(settings.keys()) * 1000000) + 1000000 * object_id
 
         md['unique_object_id'] = unique_object_id
@@ -63,38 +63,38 @@ def extract_metadata_features(file, settings, site):
                                           overlap=object_settings['measure_blobs']['settings']['overlap'],
                                           exclude_border=object_settings['measure_blobs']['settings']['exclude_border'])
 
-                blobs.to_csv(feature_path.joinpath('site_%04d_blobs_%s_%s.csv' % (site, object, channel)))
+                blobs.to_csv(feature_path.joinpath('site_%04d_blobs_%s_%s.csv' % (site, obj, channel)))
                 blob_count = blobs.groupby(['label', 'timepoint']).size()
                 fv['blob_count_%s' % channel] = md.reset_index().set_index(['label', 'timepoint']).join(
                     pd.DataFrame(blob_count, columns=['blob_count'], dtype='int')).set_index(
                     'unique_object_id')['blob_count']
 
-        # if object needs to be tracked across time, add track id
+        # if obj needs to be tracked across time, add track id
         if object_settings['measure_tracks'] == True:
             # track the objects in the dataframe and add the tracks to the metadata
             tracks = measure_tracks_2DT(md)
             md = md.join(tracks.set_index('unique_object_id'))
 
         # save metadata and feature values for this site
-        md.to_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
-        fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+        md.to_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, obj)))
+        fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
 
 
 def assign_and_aggregate(file, settings, site):
 
     feature_path = Path(settings['paths']['feature_path'])
 
-    for object_id, object in enumerate(settings['objects'].keys()):
+    for object_id, obj in enumerate(settings['objects'].keys()):
 
-        if settings['objects'][object]['assigned_objects']:
+        if settings['objects'][obj]['assigned_objects']:
 
-            md = pd.read_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
-            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+            md = pd.read_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, obj)))
+            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
             fv = fv.set_index('unique_object_id')
 
-            label_images = file['label_images/%s' % object][:]
+            label_images = file['label_images/%s' % obj][:]
 
-            for assigned_object in settings['objects'][object]['assigned_objects']:
+            for assigned_object in settings['objects'][obj]['assigned_objects']:
 
                 md_assignment = pd.read_csv(
                     feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, assigned_object)))
@@ -114,7 +114,7 @@ def assign_and_aggregate(file, settings, site):
 
                 else:
                     warnings.warn(' %s objects do not have a 1-to-1 relationship to %s . They will be aggregated.' % (
-                    assigned_object, object))
+                    assigned_object, obj))
                     counts = fv_assignment.groupby('unique_object_id').size()
                     fv_assignment = fv_assignment.groupby('unique_object_id').mean()
                     fv_assignment['count'] = counts
@@ -142,8 +142,8 @@ def assign_and_aggregate(file, settings, site):
             fv = fv.reset_index().set_index('unique_object_id')
             md = md.reset_index().set_index('unique_object_id')
 
-            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
-            md.to_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, object)))
+            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
+            md.to_csv(feature_path.joinpath('site_%04d_%s_metadata.csv' % (site, obj)))
 
         else:
             pass

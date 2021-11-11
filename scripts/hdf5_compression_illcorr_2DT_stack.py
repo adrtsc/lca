@@ -22,11 +22,12 @@ illcorr_path = Path(settings['paths']['illcorr_path'])
 output_path = Path(settings['paths']['hdf5_path'])
 magnification = settings['magnification']
 file_extension = settings['file_extension']
+illumination_correction = settings['illumination_correction']
+illumination_correction = settings['illumination_correction']
 
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
-sites = np.unique([int(re.search("(?<=_s)[0-9]{1,}", str(fyle)).group(0)) for fyle in img_files])
-channel_names = np.unique([re.search("(?<=_w[0-9])[^\W_]+(?=_s)", str(fyle)).group(0) for fyle in img_files])
+channel_names = np.unique([re.search("(?<=_w[0-9]).*(?=_)", str(fyle)).group(0) for fyle in img_files])
 
 
 # pre-load the illumination correction files:
@@ -41,7 +42,11 @@ for fyle in illcorr_files:
 
 
 # iterate over channels and timepoints and save into dataset
-site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
+if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in img_files]):
+    site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
+else:
+    site_files = img_path.glob('*.%s' % file_extension)
+
 site_files = [str(fyle) for fyle in site_files]
 site_files = natsorted(site_files)
 
@@ -50,12 +55,16 @@ channel_data = {key: [] for key in channel_names}
 for fyle in site_files:
     for channel in channel_data:
         if channel in str(fyle):
-            if file_extension == 'tif':
+            if file_extension in ['tif', 'stk']:
                 img = io.imread(fyle, plugin="tifffile")
             else:
                 img = io.imread(fyle)
-            corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
-            channel_data[channel].append(corrected_image.astype('uint16'))
+
+            if illumination_correction:
+                corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
+                channel_data[channel].append(corrected_image.astype('uint16'))
+            else:
+                channel_data[channel].append(img)
 
 # Open the experiment HDF5 file in "append" mode
 

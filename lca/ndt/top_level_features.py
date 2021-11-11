@@ -10,11 +10,11 @@ def extract_features(file, settings, site):
 
     feature_path = Path(settings['paths']['feature_path'])
 
-    for object_id, object in enumerate(settings['objects'].keys()):
+    for object_id, obj in enumerate(settings['objects'].keys()):
 
         fv = []
-        label_images = file['label_images/%s' % object][:]
-        object_settings = settings['objects'][object]
+        label_images = file['label_images/%s' % obj][:]
+        object_settings = settings['objects'][obj]
 
         # get morphology features
         if object_settings['measure_morphology']:
@@ -55,46 +55,48 @@ def extract_features(file, settings, site):
                                           overlap=object_settings['measure_blobs']['settings']['overlap'],
                                           exclude_border=object_settings['measure_blobs']['settings']['exclude_border'])
 
-                blobs.to_csv(feature_path.joinpath('site_%04d_blobs_%s_%s.csv' % (site, object, channel)))
+                blobs.to_csv(feature_path.joinpath('site_%04d_blobs_%s_%s.csv' % (site, obj, channel)))
                 blob_count = blobs.groupby(['label', 'timepoint']).size()
 
                 fv = fv.merge(blob_count.rename('blob_count_%s' % channel), on=['label', 'timepoint'], how='outer')
                 fv['blob_count_%s' % channel].fillna(0, inplace=True)
                 
 
-        # if object needs to be tracked across time, add track id
+        # if obj needs to be tracked across time, add track id
         if object_settings['measure_tracks']:
             # track the objects in the dataframe
             fv = measure_tracks_2DT(fv,
                                     max_distance=object_settings['measure_tracks']['max_distance'],
                                     time_window=object_settings['measure_tracks']['time_window'],
                                     max_split_distance=object_settings['measure_tracks']['max_split_distance'],
-                                    max_gap_closing_distance=object_settings['measure_tracks']['max_gap_closing_distance'])
+                                    max_gap_closing_distance=object_settings['measure_tracks']['max_gap_closing_distance'],
+                                    allow_splitting=object_settings['measure_tracks']['allow_splitting'],
+                                    allow_merging=object_settings['measure_tracks']['allow_merging'])
 
         # add unique_object_id
         unique_object_id = np.arange(0, len(fv)) + ((site - 1) * len(settings.keys()) * 1000000) + 1000000 * object_id
         fv['unique_object_id'] = unique_object_id
 
-        # measure if object touches the border
+        # measure if obj touches the border
         fv['is_border'] = measure_border_cells(fv)
 
         # save  feature values for this site
         fv = fv.set_index(['unique_object_id', 'timepoint'])
-        fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+        fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
 
 
 def assign_and_aggregate2(file, settings, site):
 
     feature_path = Path(settings['paths']['feature_path'])
 
-    for object_id, object in enumerate(settings['objects'].keys()):
+    for object_id, obj in enumerate(settings['objects'].keys()):
 
-        if settings['objects'][object]['assigned_objects']:
+        if settings['objects'][obj]['assigned_objects']:
 
-            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
-            label_images = file['label_images/%s' % object][:]
+            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
+            label_images = file['label_images/%s' % obj][:]
 
-            for assigned_object in settings['objects'][object]['assigned_objects']:
+            for assigned_object in settings['objects'][obj]['assigned_objects']:
 
                 fv_assignment = pd.read_csv(
                     feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, assigned_object)))
@@ -106,7 +108,7 @@ def assign_and_aggregate2(file, settings, site):
                                          left_on=['label', 'timepoint'],
                                          right_on=['label', 'timepoint'])
 
-                # check if assigned objects have 1-to-1 relationship to parent object
+                # check if assigned objects have 1-to-1 relationship to parent obj
                 array1 = np.array(fv_assignment.reset_index().unique_object_id)
                 array2 = np.array(fv.reset_index().unique_object_id)
 
@@ -115,7 +117,7 @@ def assign_and_aggregate2(file, settings, site):
 
                 else:
                     warnings.warn(' %s objects do not have a 1-to-1 relationship to %s . They will be aggregated.' % (
-                    assigned_object, object))
+                    assigned_object, obj))
                     counts = fv_assignment.groupby('unique_object_id').size()
                     fv_assignment = fv_assignment.groupby('unique_object_id').mean()
                     fv_assignment['count'] = counts
@@ -130,7 +132,7 @@ def assign_and_aggregate2(file, settings, site):
                 Design decision to be made: Do we want to keep cells without a nucleus in the dataframe?
                 If yes -> how='outer' If no, leave default value. Keeping them for now.
                 '''
-                # merge the dfs while renaming according to the assigned object
+                # merge the dfs while renaming according to the assigned obj
 
                 fv_assignment = fv_assignment.set_index(['timepoint']).add_suffix('_%s' % assigned_object)
                 fv = fv.merge(fv_assignment, left_on=['label', 'timepoint'],
@@ -139,7 +141,7 @@ def assign_and_aggregate2(file, settings, site):
 
             # reset index and save
             fv = fv.set_index(['unique_object_id', 'timepoint'])
-            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
 
 
         else:
@@ -150,14 +152,14 @@ def assign_and_aggregate(file, settings, site):
 
     feature_path = Path(settings['paths']['feature_path'])
 
-    for object_id, object in enumerate(settings['objects'].keys()):
+    for object_id, obj in enumerate(settings['objects'].keys()):
 
-        if settings['objects'][object]['assigned_objects']:
+        if settings['objects'][obj]['assigned_objects']:
 
-            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
-            label_images = file['label_images/%s' % object][:]
+            fv = pd.read_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
+            label_images = file['label_images/%s' % obj][:]
 
-            for assigned_object in settings['objects'][object]['assigned_objects']:
+            for assigned_object in settings['objects'][obj]['assigned_objects']:
 
                 fv_assignment = pd.read_csv(
                     feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, assigned_object)))
@@ -166,7 +168,7 @@ def assign_and_aggregate(file, settings, site):
 
                 fv_assignment = measure_assignment_2DT(label_images, assigned_label_images, fv, fv_assignment)
 
-                # check if assigned objects have 1-to-1 relationship to parent object
+                # check if assigned objects have 1-to-1 relationship to parent obj
                 array1 = np.array(fv_assignment.reset_index().unique_object_id)
                 array2 = np.array(fv.reset_index().unique_object_id)
 
@@ -175,7 +177,7 @@ def assign_and_aggregate(file, settings, site):
 
                 else:
                     warnings.warn(' %s objects do not have a 1-to-1 relationship to %s . They will be aggregated.' % (
-                    assigned_object, object))
+                    assigned_object, obj))
                     counts = fv_assignment.groupby('unique_object_id').size()
                     fv_assignment = fv_assignment.groupby('unique_object_id').mean()
                     fv_assignment['count'] = counts
@@ -190,7 +192,7 @@ def assign_and_aggregate(file, settings, site):
                 Design decision to be made: Do we want to keep cells without a nucleus in the dataframe?
                 If yes -> how='outer' If no, leave default value. Keeping them for now.
                 '''
-                # merge the dfs while renaming according to the assigned object
+                # merge the dfs while renaming according to the assigned obj
 
                 fv_assignment = fv_assignment.reset_index().set_index(['unique_object_id', 'timepoint'])
                 fv_assignment.columns = ['%s_%s' % (key, assigned_object) for key in fv_assignment.columns]
@@ -200,7 +202,7 @@ def assign_and_aggregate(file, settings, site):
 
             # reset index and save
             fv = fv.set_index(['unique_object_id', 'timepoint'])
-            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, object)))
+            fv.to_csv(feature_path.joinpath('site_%04d_%s_feature_values.csv' % (site, obj)))
 
 
         else:
