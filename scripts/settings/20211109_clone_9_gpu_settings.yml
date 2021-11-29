@@ -6,10 +6,6 @@ channel_colors:
   sdcYFP: yellow
 file_extension: stk
 magnification: 100
-spacing:
-- 1
-- 1
-- 6.15
 scaling: 6.15
 illumination_correction: false
 cellpose:
@@ -29,7 +25,16 @@ cellpose:
 objects:
   nuclei:
     assigned_objects: []
-    measure_blobs: false
+    measure_blobs:
+      channels:
+      - sdcRFP590-JF549
+      settings:
+        exclude_border: true
+        max_sigma: 1.5
+        min_sigma: 1.5
+        num_sigma: 1
+        overlap: 0.5
+        threshold: 0.0016
     measure_intensity:
     - sdcGFP
     - sdcRFP590-JF549
@@ -42,9 +47,9 @@ objects:
       allow_splitting: false
       allow_merging: false
 paths:
-  feature_path: Z:/20211109_clone_9/features
-  hdf5_path: Z:/20211109_clone_9/hdf5
-  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: Z:/20211109_clone_9
-  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
+  feature_path: /home/adrian/mnt/active/20211109_clone_9/features
+  hdf5_path: /home/adrian/mnt/active/20211109_clone_9/hdf5
+  illcorr_path: /home/adrian/mnt/active/illumination_correction/20211014_60x_oil
+  img_path: /home/adrian/mnt/active/20211109_clone_9/MIP
+  temp_seg_path: /home/adrian/mnt/active/20211014_bio325_test/temp_segmentation
 

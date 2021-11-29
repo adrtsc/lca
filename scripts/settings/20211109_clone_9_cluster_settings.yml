@@ -2,37 +2,34 @@ channel_colors:
   sdcCy5: red
   sdcDAPIxmRFPm: blue
   sdcGFP: green
-  sdcRFP590: magenta
+  sdcRFP590-JF549: red
   sdcYFP: yellow
 file_extension: stk
 magnification: 100
+spacing:
+- 1
+- 1
+- 6.15
+scaling: 6.15
 illumination_correction: false
 cellpose:
   nuclei:
     model: nuclei
     diameter: 150
-    resample: false
+    resample: true
     cellprob_threshold: -2.86
     flow_threshold: 7.5
     do_3D: true
+    gpu: true
     min_size: 2500
     channel: sdcRFP590-JF549
     nuclei_channel: false
-    apply_filter: false
+    apply_filter: true
   cytoplasm: false
 objects:
   nuclei:
     assigned_objects: []
-    measure_blobs:
-      channels:
-      - sdcRFP590-JF549
-      settings:
-        exclude_border: true
-        max_sigma: 1.5
-        min_sigma: 1.5
-        num_sigma: 1
-        overlap: 0.5
-        threshold: 0.0016
+    measure_blobs: false
     measure_intensity:
     - sdcGFP
     - sdcRFP590-JF549
@@ -50,4 +47,5 @@ paths:
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
   img_path: /data/active/atschan/20211109_clone_9/MIP
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
+
 

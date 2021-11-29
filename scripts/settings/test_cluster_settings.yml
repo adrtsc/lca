@@ -2,23 +2,27 @@ channel_colors:
   sdcCy5: red
   sdcDAPIxmRFPm: blue
   sdcGFP: green
-  sdcRFP590: magenta
+  mCherryKatrina: magenta
   sdcYFP: yellow
 file_extension: tif
-magnification: 60
+magnification: 100
+illumination_correction: false
 cellpose:
   nuclei:
-    diameter: 200
+    diameter: 220
     resample: false
     cellprob_threshold: -1.18
     flow_threshold: 11.89
+    min_size: 2500
     channel: sdcDAPIxmRFPm
   cells:
-    diameter: 200
+    model: cyto
+    diameter: 400
     resample: false
-    cellprob_threshold: 1.18
-    flow_threshold: 26
-    channel: sdcCy5
+    cellprob_threshold: -1.04
+    flow_threshold: 11.48
+    min_size: 35000
+    channel: sdcGFP
     nuclei_channel: sdcDAPIxmRFPm
   cytoplasm: true
 objects:
@@ -26,6 +30,7 @@ objects:
     assigned_objects:
     - nuclei
     - cytoplasm
+    - cytoplasm_eroded
     measure_blobs: false
     measure_intensity:
     - sdcGFP
@@ -34,8 +39,10 @@ objects:
     measure_tracks:
       max_distance: 125
       time_window: 3
-      max_split_distance: 170
-      max_gap_closing_distance: 170
+      max_split_distance: 125
+      max_gap_closing_distance: 125
+      allow_splitting: true
+      allow_merging: false
   cytoplasm:
     assigned_objects: []
     measure_blobs:
@@ -52,6 +59,13 @@ objects:
     - sdcGFP
     measure_morphology: true
     measure_tracks: false
+  cytoplasm_eroded:
+    assigned_objects: [ ]
+    measure_blobs: false
+    measure_intensity:
+      - sdcGFP
+    measure_morphology: true
+    measure_tracks: false
   nuclei:
     assigned_objects: []
     measure_blobs: false
@@ -61,8 +75,8 @@ objects:
     measure_morphology: true
     measure_tracks: false
 paths:
-  feature_path: X:/20211018_Sec16/features
-  hdf5_path: X:/20211018_Sec16/hdf5
+  feature_path: /data/active/katrim/Sec16/20211126_Sec16_live/wellC1_spirochrome650/exp2/
+  hdf5_path: /data/active/atschan/20211129_Katrina_test/
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: X:/20211018_Sec16/MIP/
+  img_path: /data/active/katrim/Sec16/20211126_Sec16_live/wellC1_spirochrome650/exp2/
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

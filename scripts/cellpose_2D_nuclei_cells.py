@@ -36,7 +36,7 @@ for obj in settings['cellpose'].keys():
                                              do_3D=settings['cellpose']['nuclei']['do_3D'],
                                              min_size=settings['cellpose']['nuclei']['min_size'],
                                              apply_filter=settings['cellpose']['nuclei']['apply_filter'],
-                                             anisotropy=400/65,
+                                             anisotropy=settings['scaling'],
                                              gpu=False)
 
         objs['nuclei'] = nuclei

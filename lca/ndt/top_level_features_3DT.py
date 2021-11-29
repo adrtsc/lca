@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from lca.ndt.measure import (measure_morphology_2DT,
-                             measure_intensity_2DT,
+from lca.ndt.measure import (measure_morphology_3DT,
+                             measure_intensity_3DT,
                              measure_blobs_2DT,
                              measure_tracks_2DT)
 from lca.ndt.util import measure_assignment_2DT
@@ -16,12 +16,13 @@ def extract_features(file, settings, site):
     for object_id, obj in enumerate(settings['objects'].keys()):
 
         fv = []
-        label_images = file['label_images/%s' % obj][:]
+        label_images = file['label_images/%s' % obj][:].astype('uint16')
         object_settings = settings['objects'][obj]
 
         # get morphology features
         if object_settings['measure_morphology']:
-            morphology_features = measure_morphology_2DT(label_images)
+            morphology_features = measure_morphology_3DT(label_images,
+                                                         settings['spacing'])
             fv.append(morphology_features)
 
         # get intensity features
@@ -32,8 +33,9 @@ def extract_features(file, settings, site):
             for channel in object_settings['measure_intensity']:
                 intensity_images = file['intensity_images'][channel][:]
 
-                current_features = measure_intensity_2DT(label_images,
-                                                         intensity_images)
+                current_features = measure_intensity_3DT(label_images,
+                                                         intensity_images,
+                                                         settings['spacing'])
                 current_features = current_features.set_index(['label',
                                                                'timepoint'])
                 current_features.columns = [
@@ -117,7 +119,7 @@ def assign_and_aggregate(file, settings, site):
                 feature_path.joinpath(
                     f'site_{site:04}_{obj}_feature_values.csv'))
 
-            label_images = file['label_images/%s' % obj][:]
+            label_images = file['label_images/%s' % obj][:].astype('uint16')
 
             for assigned_object in object_settings['assigned_objects']:
 

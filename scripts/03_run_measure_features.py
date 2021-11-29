@@ -10,8 +10,8 @@ SLURM_COMMAND = """#! /bin/sh
 #SBATCH --array=1-{0}
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
-#SBATCH --mem-per-cpu=20000m
-#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=7500m
+#SBATCH --cpus-per-task=8
 #SBATCH --time=240
 
 n="$SLURM_ARRAY_TASK_ID"

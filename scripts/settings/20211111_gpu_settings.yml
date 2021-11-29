@@ -42,9 +42,11 @@ objects:
       allow_splitting: false
       allow_merging: false
 paths:
-  feature_path: Z:/20211109_clone_9/features
-  hdf5_path: Z:/20211109_clone_9/hdf5
-  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: Z:/20211109_clone_9
-  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
+  feature_path: /home/adrian/mnt/active/20211111_hiPSC_MS2/GFP_5_RFP_15_4s/short/features
+  hdf5_path: /home/adrian/mnt/active/20211111_hiPSC_MS2/GFP_5_RFP_15_4s/short/hdf5
+  illcorr_path: /home/adrian/mnt/active/illumination_correction/20211014_60x_oil
+  img_path: /home/adrian/mnt/active/20211111_hiPSC_MS2/GFP_5_RFP_15_4s/short/
+  temp_seg_path: /home/adrian/mnt/active/20211014_bio325_test/temp_segmentation
+
+
 

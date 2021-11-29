@@ -27,7 +27,9 @@ illumination_correction = settings['illumination_correction']
 
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
-channel_names = np.unique([re.search("(?<=_w[0-9]).*(?=_)", str(fyle)).group(0) for fyle in img_files])
+channel_names = np.unique(
+    [re.search("(?<=_w[0-9]).*(?=_s)",
+               str(fyle)).group(0) for fyle in img_files])
 
 
 # pre-load the illumination correction files:
@@ -70,7 +72,7 @@ for fyle in site_files:
 
 with h5py.File(output_path.joinpath('site_%04d.hdf5' % site), "w") as file:
 
-    chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel]))))
+    chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
     chunk[0] = 1
     chunk = tuple(chunk)
 
@@ -84,6 +86,7 @@ with h5py.File(output_path.joinpath('site_%04d.hdf5' % site), "w") as file:
             compression='gzip', chunks=chunk, shuffle=True,
             fletcher32=True, dtype='uint16')
 
-        dataset.attrs.create(name="element_size_um", data=(1, 6.5/magnification, 6.5/magnification))
+        dataset.attrs.create(name="element_size_um",
+                             data=(1, 6.5/magnification, 6.5/magnification))
 
 

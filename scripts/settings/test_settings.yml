@@ -6,6 +6,7 @@ channel_colors:
   sdcYFP: yellow
 file_extension: tif
 magnification: 60
+illumination_correction: false
 cellpose:
   nuclei:
     diameter: 200
@@ -61,8 +62,8 @@ objects:
     measure_morphology: true
     measure_tracks: false
 paths:
-  feature_path: X:/20211018_Sec16/features
-  hdf5_path: X:/20211018_Sec16/hdf5
+  feature_path: X:/test/features
+  hdf5_path: X:/test/hdf5
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: X:/20211018_Sec16/MIP/
+  img_path: X:/20211028_Bio325_Sec16/MIP
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

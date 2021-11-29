@@ -5,12 +5,15 @@ import skimage.measure
 
 def get_parent_labels_2D(label_img, parent_label_img):
 
-    centroids = pd.DataFrame(skimage.measure.regionprops_table(label_img, properties=('label', 'centroid')))
+    centroids = pd.DataFrame(
+        skimage.measure.regionprops_table(label_img,
+                                          properties=('label', 'centroid')))
     assigned_labels = []
 
     for id, label in centroids.iterrows():
 
-        assigned_label = parent_label_img[int(label['centroid-0']), int(label['centroid-1'])]
+        assigned_label = parent_label_img[int(label['centroid-0']),
+                                          int(label['centroid-1'])]
 
         if assigned_label == 0:
             warnings.warn('object to be assigned is not contained in any object in second label image and will be lost in the aggregated dataframe')

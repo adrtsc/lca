@@ -2,7 +2,7 @@ import h5py
 from pathlib import Path
 import sys
 import yaml
-from lca.ndt import top_level_features
+from lca.ndt import top_level_features, top_level_features_3DT
 
 
 # define the site this job should process
@@ -18,6 +18,10 @@ hdf5_path = Path(settings['paths']['hdf5_path'])
 # load hdf5 file of site
 with h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "r") as file:
 
-    # extract metadata and features
-    top_level_features.main(file, settings)
+    if len(settings['spacing']) == 2:
+        # extract metadata and features
+        top_level_features.main(file, settings)
+    elif len(settings['spacing']) == 3:
+        # extract metadata and features
+        top_level_features_3DT.main(file, settings)
 

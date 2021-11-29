@@ -1,4 +1,6 @@
-from lca.nd.segmentation import segment_nuclei_cellpose, segment_cells_cellpose
+from lca.nd.segmentation import segment_nuclei_cellpose_2D
+from lca.nd.segmentation import segment_nuclei_cellpose_3D
+from lca.nd.segmentation import segment_cells_cellpose
 import numpy as np
 from skimage.segmentation import find_boundaries
 
@@ -6,13 +8,14 @@ from skimage.segmentation import find_boundaries
 def segment_nuclei_cellpose_2DT(intensity_images, diameter, resample=True,
                                 flow_threshold=0.4, cellprob_threshold=0,
                                 min_size=2500, gpu=False, torch=False,
-                                apply_filter=True, do_3D=False, anisotropy=1.0):
+                                apply_filter=True, do_3D=False,
+                                anisotropy=1.0):
 
     label_images = []
 
     for idx, intensity_image in enumerate(list(intensity_images)):
 
-        label_image = segment_nuclei_cellpose(
+        label_image = segment_nuclei_cellpose_2D(
             intensity_image=intensity_image,
             diameter=diameter,
             resample=resample,
@@ -22,9 +25,42 @@ def segment_nuclei_cellpose_2DT(intensity_images, diameter, resample=True,
             min_size=min_size,
             gpu=gpu,
             torch=torch,
-            apply_filter=apply_filter, anisotropy=anisotropy)
+            apply_filter=apply_filter,
+            anisotropy=anisotropy)
 
         label_images.append(label_image.astype('uint16'))
+
+    label_images = np.stack(label_images, axis=0)
+
+    return label_images
+
+
+def segment_nuclei_cellpose_3DT(intensity_images, diameter, resample=False,
+                                flow_threshold=0.4, cellprob_threshold=0,
+                                min_size=2500, gpu=False, torch=False,
+                                apply_filter=True, do_3D=True,
+                                anisotropy=1.0):
+
+    label_images = []
+
+    for idx, intensity_image in enumerate(list(intensity_images)):
+
+        label_image = segment_nuclei_cellpose_3D(
+            intensity_image=intensity_image,
+            diameter=diameter,
+            resample=resample,
+            flow_threshold=flow_threshold,
+            cellprob_threshold=cellprob_threshold,
+            do_3D=do_3D,
+            min_size=min_size,
+            gpu=gpu,
+            torch=torch,
+            apply_filter=apply_filter,
+            anisotropy=anisotropy)
+
+        label_images.append(label_image.astype('uint16'))
+
+        print(f'processed timepoint {idx}.')
 
     label_images = np.stack(label_images, axis=0)
 

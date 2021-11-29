@@ -1,7 +1,7 @@
-import skimage.measure
 import pandas as pd
 import numpy as np
 from lca.util import measure_border_cells
+from skimage.measure import regionprops_table
 from skimage.feature import blob_log
 from skimage.draw import disk
 
@@ -16,7 +16,26 @@ def measure_morphology_2D(label_image):
                 'moments_hu', 'moments_normalized', 'orientation',
                 'perimeter', 'solidity')
 
-    regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image, properties=features))
+    regionprops = pd.DataFrame(
+        regionprops_table(label_image, properties=features))
+
+    # measure borders
+    border_0, border_1, border_2, border_3 = (0,
+                                              0,
+                                              np.shape(label_image)[-2],
+                                              np.shape(label_image)[-1])
+
+    is_border = []
+
+    for idx, obj in props.iterrows():
+        # check which cells are border cells
+        is_border_0 = obj['bbox-0'] == border_0
+        is_border_1 = obj['bbox-1'] == border_1
+        is_border_2 = obj['bbox-2'] == border_2
+        is_border_3 = obj['bbox-3'] == border_3
+        is_border.append(is_border_0 | is_border_1 | is_border_2 | is_border_3)
+
+    regionprops['is_border'] = is_border
 
     return regionprops
 
@@ -24,9 +43,10 @@ def measure_morphology_2D(label_image):
 def measure_intensity_2D(label_image, intensity_image):
 
     features = ('label', 'max_intensity', 'mean_intensity', 'min_intensity')
-    regionprops = pd.DataFrame(skimage.measure.regionprops_table(label_image,
-                                                                 intensity_image=intensity_image,
-                                                                 properties=features))
+    regionprops = pd.DataFrame(
+        regionprops_table(label_image,
+                          intensity_image=intensity_image,
+                          properties=features))
 
 
     return regionprops
@@ -57,7 +77,8 @@ def measure_blobs_2D(intensity_image,
         object_labels = []
 
         for index, blob in blobs.iterrows():
-            current_label = label_image[int(blob['centroid-0']), int(blob['centroid-1'])]
+            current_label = label_image[int(blob['centroid-0']),
+                                        int(blob['centroid-1'])]
             object_labels.append(current_label)
 
         blobs['label'] = object_labels
@@ -106,5 +127,51 @@ def measure_blobs_2D(intensity_image,
     blobs['size'] = blobs['size']*np.sqrt(2)*2
 
     return blobs
+
+
+def measure_border_cells_3D(label_image):
+    border_0, border_1, border_2, border_3 = (0,
+                                              0,
+                                              np.shape(label_image)[-2],
+                                              np.shape(label_image)[-1])
+
+    props = pd.DataFrame(regionprops_table(label_image))
+
+    is_border = []
+
+    for idx, obj in props.iterrows():
+        # check which cells are border cells
+        is_border_0 = obj['bbox-1'] == border_0
+        is_border_1 = obj['bbox-2'] == border_1
+        is_border_2 = obj['bbox-4'] == border_2
+        is_border_3 = obj['bbox-5'] == border_3
+        is_border.append(is_border_0 | is_border_1 | is_border_2 | is_border_3)
+
+    props['is_border'] = is_border
+
+    return props[['label', 'is_border']]
+
+
+def measure_border_cells_2D(label_image):
+    border_0, border_1, border_2, border_3 = (0,
+                                              0,
+                                              np.shape(label_image)[-2],
+                                              np.shape(label_image)[-1])
+
+    props = pd.DataFrame(regionprops_table(label_image))
+
+    is_border = []
+
+    for idx, obj in props.iterrows():
+        # check which cells are border cells
+        is_border_0 = obj['bbox-0'] == border_0
+        is_border_1 = obj['bbox-1'] == border_1
+        is_border_2 = obj['bbox-2'] == border_2
+        is_border_3 = obj['bbox-3'] == border_3
+        is_border.append(is_border_0 | is_border_1 | is_border_2 | is_border_3)
+
+    props['is_border'] = is_border
+
+    return props[['label', 'is_border']]
 
 
