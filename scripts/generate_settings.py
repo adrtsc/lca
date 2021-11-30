@@ -7,6 +7,8 @@ illcorr_path = r'/data/active/atschan/illumination_correction/'
 temp_seg_path = r'/data/active/atschan/20210930_dummy/temp_segmentation'
 magnification = 40
 file_extension = 'tif'
+illumination_correction = False
+output_filename = 'test'
 
 settings = {'paths': {'img_path': img_path,
                       'hdf5_path': hdf5_path,
@@ -15,6 +17,7 @@ settings = {'paths': {'img_path': img_path,
                       'temp_seg_path': temp_seg_path},
             'file_extension': file_extension,
             'magnification': magnification,
+            'illumination_correction': illumination_correction
             'spacing': [0, 0, 1],
             'objects': {'nuclei': {'measure_morphology': True,
                                    'measure_intensity': ['sdcGFP', 'sdcDAPIxmRFPm'],
@@ -61,5 +64,5 @@ settings = {'paths': {'img_path': img_path,
                                'sdcCy5': 'magenta'}}
 
 
-with open('scripts/settings/2test.yml', 'w') as outfile:
+with open(f'scripts/settings/{output_filename}.yml', 'w') as outfile:
     yaml.dump(settings, outfile, default_flow_style=False)

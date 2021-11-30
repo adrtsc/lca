@@ -27,7 +27,7 @@ def measure_morphology_2D(label_image):
 
     is_border = []
 
-    for idx, obj in props.iterrows():
+    for idx, obj in regionprops.iterrows():
         # check which cells are border cells
         is_border_0 = obj['bbox-0'] == border_0
         is_border_1 = obj['bbox-1'] == border_1

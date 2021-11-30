@@ -59,7 +59,7 @@ def visualize_site(settings, site, intensities=True, labels=True, boundaries=Tru
 
 
 # load settings
-with open('scripts/settings/bio325_Sec16_settings.yml', 'r') as stream:
+with open('scripts/settings/20211126_Sec16_live_settings.yml', 'r') as stream:
     settings = yaml.safe_load(stream)
 
 visualize_site(settings, 1)

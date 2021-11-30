@@ -125,7 +125,7 @@ def assign_and_aggregate(file, settings, site):
                     feature_path.joinpath(
                         f'site_{site:04}_{assigned_object}_feature_values.csv'))
 
-                assigned_label_images = file['label_images/{assigned_object}'][:]
+                assigned_label_images = file[f'label_images/{assigned_object}'][:]
 
                 fv_assignment = measure_assignment_2DT(label_images,
                                                        assigned_label_images,
