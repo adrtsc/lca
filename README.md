@@ -11,14 +11,18 @@ This repository contains code for the analysis of 2DT and 3DT live imaging data.
 ## Installation
 
 <ol>
-  <li> create a virtual python environment </li>
+  <li> Create a virtual python environment </li>
   
     conda create -n lca python=3.9
   
-  <li> activate your virtual python environment </li>
+  <li> Activate your virtual python environment </li>
   
     conda activate lca
 
-  <li> install lca from github </li>
+  <li> Install lca from github </li>
   
     pip install git+https://github.com/adrtsc/lca.git
+
+  <li> The tracking in this framework is formulated as a linear assignment problem. To solve this problem we use a very useful Cython implementation of the auction algorithm (https://github.com/OllieBoyne/sslap).
+    
+    pip install git+https://github.com/OllieBoyne/sslap.git
