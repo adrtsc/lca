@@ -14,6 +14,10 @@ This repository contains code for the analysis of 2DT and 3DT live imaging data.
   <li> create a virtual python environment </li>
   
     conda create -n lca python=3.9
+  
+  <li> activate your virtual python environment </li>
+  
+    conda activate lca
 
   <li> install lca from github </li>
   
