@@ -3,7 +3,7 @@
 """
 Created on Mon Oct 21 12:36:52 2019
 
-@author: team1
+@author: adrian tschan
 """
 
 from distutils.core import setup
@@ -34,6 +34,6 @@ setup(name='lca',
             'pyyaml',
             'napari-feature-visualization @ git+https://github.com/adrtsc/napari-feature-visualization',
             'napari-blob-detection @ git+https://github.com/adrtsc/napari-blob-detection',
-            #'sslap @ git+https://github.com/OllieBoyne/sslap',
+            'sslap @ git+https://github.com/OllieBoyne/sslap',
       ]
       )
