@@ -10,6 +10,8 @@ This repository contains code for the analysis of 2DT and 3DT live imaging data.
 
 ## Installation
 
+You will need to install everything on the cluster as well as locally (to do some parameter tuning).
+
 <ol>
   <li> Create a virtual python environment </li>
   
