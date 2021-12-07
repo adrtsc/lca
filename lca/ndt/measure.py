@@ -4,6 +4,7 @@ from lca.ndt.LapTracker import LapTracker
 from lca.nd.measure import measure_morphology_2D
 from lca.nd.measure import measure_intensity_2D
 from lca.nd.measure import measure_blobs_2D
+from lca.nd.measure import measure_blobs_3D
 from abbott.itk_measure import (get_shape_features_dataframe,
                                 get_intensity_features_dataframe)
 from abbott.conversions import to_itk
@@ -131,6 +132,34 @@ def measure_blobs_2DT(intensity_images,
     for idx, label_image in enumerate(list(label_images)):
         intensity_image = intensity_images[idx, :, :]
         current_blobs = measure_blobs_2D(intensity_image,
+                                         label_image,
+                                         min_sigma=min_sigma,
+                                         max_sigma=max_sigma,
+                                         num_sigma=num_sigma,
+                                         threshold=threshold,
+                                         overlap=overlap,
+                                         exclude_border=exclude_border)
+
+        current_blobs['timepoint'] = idx
+        blobs = pd.concat([blobs, current_blobs])
+
+    return blobs
+
+
+def measure_blobs_3DT(intensity_images,
+                      label_images,
+                      min_sigma=5,
+                      max_sigma=10,
+                      num_sigma=1,
+                      threshold=0.001,
+                      overlap=0.5,
+                      exclude_border=True):
+
+    blobs = pd.DataFrame()
+
+    for idx, label_image in enumerate(list(label_images)):
+        intensity_image = intensity_images[idx, :, :]
+        current_blobs = measure_blobs_3D(intensity_image,
                                          label_image,
                                          min_sigma=min_sigma,
                                          max_sigma=max_sigma,

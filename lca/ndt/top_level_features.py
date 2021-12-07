@@ -176,7 +176,7 @@ def assign_and_aggregate(file, settings, site):
             fv = fv.set_index(['unique_object_id', 'timepoint'])
             fv.to_csv(
                 feature_path.joinpath(
-                    'site_{site:04}_{obj}_feature_values.csv'))
+                    f'site_{site:04}_{obj}_feature_values.csv'))
 
 
         else:

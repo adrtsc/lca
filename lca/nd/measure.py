@@ -129,6 +129,87 @@ def measure_blobs_2D(intensity_image,
     return blobs
 
 
+def measure_blobs_3D(intensity_image,
+                     label_image=None,
+                     min_sigma=5,
+                     max_sigma=10,
+                     num_sigma=1,
+                     threshold=0.001,
+                     overlap=0.5,
+                     exclude_border=True):
+
+    blobs = blob_log(intensity_image,
+                     min_sigma=min_sigma,
+                     max_sigma=max_sigma,
+                     num_sigma=num_sigma,
+                     threshold=threshold,
+                     overlap=overlap,
+                     exclude_border=exclude_border)
+
+    blobs = pd.DataFrame(blobs, columns=['centroid-0',
+                                         'centroid-1',
+                                         'centroid-2',
+                                         'size'])
+
+    if label_image is not None:
+        object_labels = []
+
+        for index, blob in blobs.iterrows():
+            current_label = label_image[int(blob['centroid-0']),
+                                        int(blob['centroid-1']),
+                                        int(blob['centroid-2'])]
+            object_labels.append(current_label)
+
+        blobs['label'] = object_labels
+        blobs = blobs.loc[blobs['label'] > 0]
+
+    min_intensity = []
+    max_intensity = []
+    mean_intensity = []
+    var_intensity = []
+    mean_bg_intensity = []
+
+    for index, row in blobs.iterrows():
+
+        c_img = intensity_image[row['centroid-0'].astype("int"), :, :]
+
+        rr, cc = disk(tuple(row[['centroid-1', 'centroid-2']]), row['size'],
+                      shape=np.shape(c_img))
+
+        rr_bg, cc_bg = disk(tuple(row[['centroid-1', 'centroid-2']]),
+                            2 * row['size'],
+                            shape=np.shape(c_img))
+
+        pixels = c_img[rr, cc]
+        pixels_bg = c_img[rr_bg, cc_bg]
+
+        n_pixels = len(pixels)
+        n_pixels_bg = len(pixels_bg)
+
+        mean_bg_intensity.append((np.sum(pixels_bg) - np.sum(pixels))
+                                 / (n_pixels_bg - n_pixels))
+
+        mean_intensity.append(np.mean(pixels))
+
+        min_intensity.append(np.min(pixels))
+        max_intensity.append(np.max(pixels))
+        var_intensity.append(np.var(pixels))
+
+
+    blobs['min_intensity'] = min_intensity
+    blobs['max_intensity'] = max_intensity
+    blobs['mean_intensity'] = mean_intensity
+    blobs['var_intensity'] = var_intensity
+    blobs['mean_background_intensity'] = mean_bg_intensity
+    blobs['SNR'] = np.array(mean_intensity) / np.array(mean_bg_intensity)
+
+    # adjust size to represent diameter rather than sigma
+
+    blobs['size'] = blobs['size']*np.sqrt(2)*2
+
+    return blobs
+
+
 def measure_border_cells_3D(label_image):
     border_0, border_1, border_2, border_3 = (0,
                                               0,

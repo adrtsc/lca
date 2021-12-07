@@ -6,6 +6,10 @@ channel_colors:
   sdcYFP: yellow
 file_extension: tif
 magnification: 60
+scaling: 1
+spacing:
+- 1
+- 1
 illumination_correction: false
 cellpose:
   nuclei:

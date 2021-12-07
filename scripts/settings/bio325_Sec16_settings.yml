@@ -62,7 +62,7 @@ objects:
     measure_tracks: false
 paths:
   feature_path: X:/20211028_Bio325_Sec16/features
-  hdf5_path: X:/20211028_Bio325_Sec16/hdf5
+  hdf5_path: X:/20211028_Bio325_Sec16/zarr
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
   img_path: X:/20211028_Bio325_Sec16/MIP
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

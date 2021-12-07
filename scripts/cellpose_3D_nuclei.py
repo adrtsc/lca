@@ -6,12 +6,18 @@ import numpy as np
 from lca.ndt.segmentation import segment_nuclei_cellpose_3DT
 
 
-# define the site this job should process
+'''# define the site this job should process
 site = 1
 
 # load settings
 settings_path = Path('/home/adrian/mnt/work/PhD/Code/Python/lca/scripts/settings/20211111_gpu_settings.yml')
+'''
 
+# define the site this job should process
+site = int(sys.argv[1])
+
+# load settings
+settings_path = Path(sys.argv[2])
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
