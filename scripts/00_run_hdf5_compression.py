@@ -16,7 +16,7 @@ SLURM_COMMAND = """#! /bin/sh
 
 n="$SLURM_ARRAY_TASK_ID"
 
-exec python hdf5_compression_illcorr_2DT_stack.py $n {1}
+exec python hdf5_compression_illcorr.py $n {1}
 """
 
 # load settings
