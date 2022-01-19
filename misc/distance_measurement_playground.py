@@ -5,7 +5,7 @@ import h5py
 import yaml
 from pathlib import Path
 
-settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20211111_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20211111_UAP56_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
@@ -33,7 +33,7 @@ test = measure_blobs_3DT(intensity_image,
                          min_sigma=2,
                          max_sigma=2,
                          num_sigma=1,
-                         threshold=0.0005)
+                         threshold=0.00035)
 
 
 viewer.add_points(test[['timepoint',
@@ -108,7 +108,7 @@ def measure_distance_points_mask_3DT(df, mask, anisotropy):
 
 new_df = measure_distance_points_mask_3DT(test, speckles, 7.7)
 
-feature_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_4s\short\features\site_0001_nuclei_feature_values.csv")
+feature_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_Cy5_15_6s_UAP56\short\features\site_0001_nuclei_feature_values.csv")
 fv = pd.read_csv(feature_path)
 
 # add track id to blobs

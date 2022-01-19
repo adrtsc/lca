@@ -41,7 +41,7 @@ def segment_nuclei_cellpose_2D(intensity_image, diameter, resample=True,
 def segment_nuclei_cellpose_3D(intensity_image, diameter, resample=False,
                                flow_threshold=0.4, min_size=2500,
                                cellprob_threshold=0, gpu=False, torch=False,
-                               apply_filter=True, do_3D=True,
+                               apply_filter=True, filter_sigma=10, do_3D=True,
                                anisotropy=1.0):
 
     model = models.Cellpose(gpu=gpu, torch=torch, model_type="nuclei")
@@ -54,7 +54,7 @@ def segment_nuclei_cellpose_3D(intensity_image, diameter, resample=False,
         image = sitk.GetImageFromArray(intensity_image)
         image.SetSpacing((1.0, 1.0, anisotropy))
         gaussianfilter = sitk.SmoothingRecursiveGaussianImageFilter()
-        gaussianfilter.SetSigma(10)
+        gaussianfilter.SetSigma(filter_sigma)
         intensity_image = sitk.GetArrayFromImage(gaussianfilter.Execute(image))
 
     label_image, flows, styles, diams = model.eval(

@@ -4,6 +4,7 @@ channel_colors:
   sdcGFP: green
   mCherryKatrina: magenta
   sdcYFP: yellow
+microscope: cv7k
 file_extension: tif
 magnification: 100
 scaling: 1
@@ -72,8 +73,8 @@ objects:
     measure_morphology: true
     measure_tracks: false
 paths:
-  feature_path: /data/active/atschan/20211129_Katrina_test/wellB1_spirochrome650/
-  hdf5_path: /data/active/atschan/20211129_Katrina_test/wellB1_spirochrome650/hdf5/
+  feature_path: /data/active/atschan/20220118_lca_CV7K/features/
+  hdf5_path: /data/active/atschan/20220118_lca_CV7K/hdf5/
   illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
-  img_path: /data/active/katrim/Sec16/20211126_Sec16_live/wellB1_spirochrome650/
+  img_path: /data/active/atschan/20220118_lca_CV7K/
   temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

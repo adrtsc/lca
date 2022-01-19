@@ -1,4 +1,4 @@
-import h5py
+import zarr
 import numpy as np
 from pathlib import Path
 from skimage import io
@@ -17,7 +17,6 @@ with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
 # get all paths from settings
-microscope = settings['microscope']
 img_path = Path(settings['paths']['img_path'])
 illcorr_path = Path(settings['paths']['illcorr_path'])
 output_path = Path(settings['paths']['hdf5_path'])
@@ -28,23 +27,10 @@ illumination_correction = settings['illumination_correction']
 
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
+channel_names = np.unique(
+    [re.search("(?<=_w[0-9]).*(?=_s)",
+               str(fyle)).group(0) for fyle in img_files])
 
-if microscope == 'visicope':
-
-    channel_names = np.unique(
-        [re.search("(?<=_w[0-9]).*(?=_s)",
-                   str(fyle)).group(0) for fyle in img_files])
-
-    # wells = ['A01']
-
-elif microscope == 'cv7k':
-    channel_names = np.unique(
-        [re.search(f"(?<=Z[0-9]{{2}}).*(?=.{file_extension})",
-                   str(fyle)).group(0) for fyle in img_files])
-
-    # wells = np.unique(
-    #     [re.search("(?<=_)[a-zA-Z]+[0-9]{2}(?=_T[0-9]{4})",
-    #                str(fyle)).group(0) for fyle in img_files])
 
 # pre-load the illumination correction files:
 illum_corr = {key: [] for key in channel_names}
@@ -56,8 +42,14 @@ for fyle in illcorr_files:
             img = io.imread(fyle)
             illum_corr[channel].append(img)
 
+
 # iterate over channels and timepoints and save into dataset
-site_files = [f for f in img_files if re.search(f'_T[0-9]{{4}}F{site:03d}', str(f))]
+if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in img_files]):
+    site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
+else:
+    site_files = img_path.glob('*.%s' % file_extension)
+
+site_files = [str(fyle) for fyle in site_files]
 site_files = natsorted(site_files)
 
 channel_data = {key: [] for key in channel_names}
@@ -76,25 +68,24 @@ for fyle in site_files:
             else:
                 channel_data[channel].append(img)
 
-# Open the experiment HDF5 file in "append" mode
+# Open the experiment zarr file and append data
+z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')
 
-with h5py.File(output_path.joinpath(f'site_{site:04d}.hdf5'), "w") as file:
+chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
+chunk[0] = 1
+chunk = tuple(chunk)
 
-    chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
-    chunk[0] = 1
-    chunk = tuple(chunk)
+grp = z.create_group("intensity_images")
 
-    grp = file.create_group("intensity_images")
+for channel in channel_data:
+    # Create a dataset in the file
+    dataset = grp.create_dataset(
+        channel,
+        shape=np.shape(np.squeeze(np.stack(channel_data[channel]))),
+        chunks=chunk,
+        dtype='uint16')
 
-    for channel in channel_data:
-        # Create a dataset in the file
-        dataset = grp.create_dataset(
-            channel, np.shape(np.squeeze(np.stack(channel_data[channel]))),
-            data=np.stack(channel_data[channel]),
-            compression='gzip', chunks=chunk, shuffle=True,
-            fletcher32=True, dtype='uint16')
+    dataset[:] = np.stack(channel_data[channel])
 
-        dataset.attrs.create(name="element_size_um",
-                             data=(1, 6.5/magnification, 6.5/magnification))
-
+    dataset.attrs["element_size_um"] = (1, 6.5 / magnification, 6.5 / magnification)
 
