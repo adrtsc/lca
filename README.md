@@ -8,6 +8,8 @@ This repository contains code for the analysis of 2DT and 3DT live imaging data.
   <li> measurement of features (e.g. morphology features or intensity features) based on the segmentations </li>
 </ol>
 
+For each of these steps, the user will have to define suitable parameters. These parameters are then saved in a settings file that is specific for each experiment and which will be used in the final image processing.
+
 ## Installation
 
 You will need to install everything on the cluster as well as locally (to do some parameter tuning).
