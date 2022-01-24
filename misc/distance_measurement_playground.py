@@ -5,7 +5,7 @@ import h5py
 import yaml
 from pathlib import Path
 
-settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20211111_UAP56_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20211111_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
@@ -33,7 +33,7 @@ test = measure_blobs_3DT(intensity_image,
                          min_sigma=2,
                          max_sigma=2,
                          num_sigma=1,
-                         threshold=0.00035)
+                         threshold=0.0005)
 
 
 viewer.add_points(test[['timepoint',
@@ -108,7 +108,7 @@ def measure_distance_points_mask_3DT(df, mask, anisotropy):
 
 new_df = measure_distance_points_mask_3DT(test, speckles, 7.7)
 
-feature_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_Cy5_15_6s_UAP56\short\features\site_0001_nuclei_feature_values.csv")
+feature_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_4s\short\features\site_0001_nuclei_feature_values.csv")
 fv = pd.read_csv(feature_path)
 
 # add track id to blobs
@@ -146,7 +146,7 @@ plt.show()
 
 
 ax = sns.lmplot(data=aggregated_df, x='mean_intensity',
-                y='distance_speckles_um', col='track_id', col_wrap=3,
+                y='distance_speckles_um', col='track_id', col_wrap=2,
                 hue='track_id', palette='tab10')
 ax.set(ylabel="distance from nuclear speckle border ($\mu m)$",
        xlabel='normalized mean transcriptional start site intensity')
@@ -161,16 +161,26 @@ plt.show()
 # normalize mean intensity per cell
 
 def max_norm(group):
-    group['mean_intensity'] = group['mean_intensity'] / group['mean_intensity'].max()
+    group['mean_intensity'] = (group['mean_intensity'] - group['mean_intensity'].min()) / (group['mean_intensity'].max() - group['mean_intensity'].min())
 
     return group
 
 aggregated_df = aggregated_df.groupby('track_id').apply(lambda group: max_norm(group))
 
+# drop track id 1 and 11
+
+aggregated_df = aggregated_df[~aggregated_df.track_id.isin([1, 11])]
+
 ax = sns.relplot(data=aggregated_df, x='time_seconds',
                  y='distance_speckles_um',
                  hue='mean_intensity',
-                 col='track_id', col_wrap=3, kind='scatter', palette='viridis')
+                 s=50,
+                 aspect=1,
+                 col='track_id', col_wrap=2, kind='scatter', palette='viridis',
+                 legend=False)
 ax.set(ylabel="distance from nuclear speckle border ($\mu m)$",
-       xlabel='normalized mean transcriptional start site intensity')
+       xlabel='time (s)')
+sm = plt.cm.ScalarMappable(cmap="viridis")
+plt.colorbar(sm)
 plt.show()
+

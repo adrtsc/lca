@@ -33,12 +33,17 @@ img_files = [fyle for fyle in img_files]
 
 # check if image files contain multiple sites
 if microscope == 'visicope':
-    if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in img_files]):
-        n_sites = len(np.unique([int(re.search("(?<=_s)[0-9]{1,}", str(fyle)).group(0)) for fyle in img_files]))
+    if any([bool(re.search('(?<=_s)[0-9]{1,}',
+                           str(fyle))) for fyle in img_files]):
+        n_sites = len(np.unique(
+            [int(re.search("(?<=_s)[0-9]{1,}",
+                           str(fyle)).group(0)) for fyle in img_files]))
     else:
         n_sites = 1
 elif microscope == 'cv7k':
-    n_sites = len(np.unique([int(re.search("(?<=F)[0-9]{3}", str(fyle)).group(0)) for fyle in img_files]))
+    n_sites = len(np.unique(
+        [int(re.search("(?<=F)[0-9]{3}",
+                       str(fyle)).group(0)) for fyle in img_files]))
 
 with open("temp.sh", "w") as f:
     f.write(SLURM_COMMAND.format(n_sites, settings_path))

@@ -57,7 +57,8 @@ for fyle in illcorr_files:
             illum_corr[channel].append(img)
 
 # iterate over channels and timepoints and save into dataset
-site_files = [f for f in img_files if re.search(f'_T[0-9]{{4}}F{site:03d}', str(f))]
+site_files = [f for f in img_files if re.search(f'_T[0-9]{{4}}F{site:03d}',
+                                                str(f))]
 site_files = natsorted(site_files)
 
 channel_data = {key: [] for key in channel_names}
@@ -80,7 +81,8 @@ for fyle in site_files:
 
 with h5py.File(output_path.joinpath(f'site_{site:04d}.hdf5'), "w") as file:
 
-    chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
+    chunk = list(np.shape(np.squeeze(np.stack(
+        channel_data[channel_names[0]]))))
     chunk[0] = 1
     chunk = tuple(chunk)
 
