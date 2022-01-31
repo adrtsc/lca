@@ -36,36 +36,6 @@ measure_intensity_2DT = iterate_time(measure_intensity_2D)
 measure_blobs_2DT = iterate_time(measure_blobs_2D)
 
 
-
-
-
-def measure_intensity_3DT(label_images, intensity_images, spacing):
-
-    regionprops = []
-
-    for idx, label_image in enumerate(list(label_images)):
-        intensity_image = intensity_images[idx, :, :]
-
-        label_image = to_itk(label_image, spacing=spacing)
-        intensity_image = to_itk(intensity_image, spacing=spacing)
-
-        current_regionprops = get_intensity_features_dataframe(label_image,
-                                                               intensity_image)
-        current_regionprops['timepoint'] = idx
-
-        # adjust some of the column names that are relevant for tracking
-        current_regionprops.rename(columns={'Label': 'label'},
-                                   inplace=True)
-        regionprops.append(current_regionprops)
-
-
-        print(f'measured intensity features of timepoint {idx}')
-
-    regionprops = pd.concat(regionprops)
-
-    return regionprops
-
-
 def measure_tracks_2DT(df, max_distance,
                        time_window,
                        max_split_distance,
