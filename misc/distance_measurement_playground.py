@@ -184,3 +184,31 @@ sm = plt.cm.ScalarMappable(cmap="viridis")
 plt.colorbar(sm)
 plt.show()
 
+
+ax = sns.relplot(data=aggregated_df, x='time_seconds',
+                 y='mean_intensity',
+                 hue='distance_speckles_um',
+                 s=50,
+                 aspect=1,
+                 col='track_id', col_wrap=2, kind='scatter', palette='viridis',
+                 legend=False)
+ax.set(ylabel="distance from nuclear speckle border ($\mu m)$",
+       xlabel='time (s)')
+sm = plt.cm.ScalarMappable(cmap="viridis")
+plt.colorbar(sm)
+plt.show()
+
+agg_measures = pd.DataFrame()
+
+agg_measures['fano'] = aggregated_df.groupby('track_id').apply(lambda x: np.var(x['mean_intensity']/np.median(x['mean_intensity'])))
+agg_measures['mean_distance'] = aggregated_df.groupby('track_id').apply(lambda x: np.mean(x['distance_speckles_um']))
+agg_measures['cv'] = aggregated_df.groupby('track_id').apply(lambda x: np.std(x['mean_intensity']/np.median(x['mean_intensity'])))
+
+sns.scatterplot(data=agg_measures, x='mean_distance', y='fano', hue='track_id', palette='viridis')
+plt.show()
+
+sns.scatterplot(data=agg_measures, x='mean_distance', y='cv', hue='track_id', palette='viridis')
+plt.show()
+
+sns.violinplot(data=aggregated_df, x='track_id', y='mean_intensity')
+plt.show()
