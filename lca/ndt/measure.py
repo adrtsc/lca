@@ -1,68 +1,39 @@
 import pandas as pd
 import numpy as np
+import functools
 from lca.ndt.LapTracker import LapTracker
 from lca.nd.measure import measure_morphology_2D
 from lca.nd.measure import measure_intensity_2D
 from lca.nd.measure import measure_blobs_2D
 
 
-def measure_morphology_2DT(label_images):
+def iterate_time(func):
+    @functools.wraps(func)
+    def wrapper_decorator(**kwargs):
 
-    regionprops = []
+        if 'label_image' in kwargs:
+            dims = kwargs['label_image'].shape
+        else:
+            dims = kwargs['intensity_image'].shape
 
-    # measure regionprops for each timepoine
-    for idx, label_image in enumerate(list(label_images)):
-        current_regionprops = measure_morphology_2D(label_image)
-        current_regionprops['timepoint'] = idx
-        regionprops.append(current_regionprops)
-
-    regionprops = pd.concat(regionprops)
-
-    return regionprops
-
-
-def measure_intensity_2DT(label_images, intensity_images):
-
-    regionprops = []
-
-    for idx, label_image in enumerate(list(label_images)):
-        intensity_image = intensity_images[idx, :, :]
-        current_regionprops = measure_intensity_2D(label_image,
-                                                   intensity_image)
-        current_regionprops['timepoint'] = idx
-        regionprops.append(current_regionprops)
-
-    regionprops = pd.concat(regionprops)
-
-    return regionprops
+        out = list()
+        for t in range(0, dims[0]):
+            # give only one slice of the input array as input for function
+            relevant_keys = ['label_image', 'intensity_image']
+            new_kwargs = {key: value[t, :, :] if key in relevant_keys
+            else value for (key, value) in kwargs.items()}
+            df = func(**new_kwargs)
+            # append timepoint
+            df['timepoint'] = t
+            # append to output df
+            out.append(df)
+        return pd.concat(out)
+    return wrapper_decorator
 
 
-def measure_blobs_2DT(intensity_images,
-                      label_images,
-                      min_sigma=5,
-                      max_sigma=10,
-                      num_sigma=1,
-                      threshold=0.001,
-                      overlap=0.5,
-                      exclude_border=True):
-
-    blobs = pd.DataFrame()
-
-    for idx, label_image in enumerate(list(label_images)):
-        intensity_image = intensity_images[idx, :, :]
-        current_blobs = measure_blobs_2D(intensity_image,
-                                         label_image,
-                                         min_sigma=min_sigma,
-                                         max_sigma=max_sigma,
-                                         num_sigma=num_sigma,
-                                         threshold=threshold,
-                                         overlap=overlap,
-                                         exclude_border=exclude_border)
-
-        current_blobs['timepoint'] = idx
-        blobs = pd.concat([blobs, current_blobs])
-
-    return blobs
+measure_morphology_2DT = iterate_time(measure_morphology_2D)
+measure_intensity_2DT = iterate_time(measure_intensity_2D)
+measure_blobs_2DT = iterate_time(measure_blobs_2D)
 
 
 def measure_tracks_2DT(df, max_distance,
