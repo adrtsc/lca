@@ -126,6 +126,10 @@ new_df['track_id'] = track_ids
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+feature_path = Path(r'Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_4s\short\features')
+
+new_df = pd.read_csv(feature_path.joinpath('measured_distance.csv'))
+
 sns.set_theme()
 
 to_plot = new_df
@@ -184,3 +188,17 @@ sm = plt.cm.ScalarMappable(cmap="viridis")
 plt.colorbar(sm)
 plt.show()
 
+summary_measurements = pd.DataFrame()
+summary_measurements['fano_factor'] = aggregated_df.groupby('track_id').apply(lambda x: np.var(x['mean_intensity']/np.mean(x['mean_intensity'])))
+summary_measurements['mean_distance_ns'] = aggregated_df.groupby('track_id').apply(lambda x: np.mean(x['distance_speckles_um']))
+summary_measurements['mean_intensity'] = aggregated_df.groupby('track_id').apply(lambda x: np.mean(x['mean_intensity']))
+
+sns.relplot(data=summary_measurements, x='mean_distance_ns', y='fano_factor', s=150, hue='track_id', palette='tab20')
+ax.set(ylabel="distance from nuclear speckle border ($\mu m)$",
+       xlabel='time (s)')
+plt.show()
+
+
+
+sns.lineplot(data=aggregated_df, x='time_seconds', y='mean_intensity', hue='track_id', palette='tab20', linewidth=3)
+plt.show()
