@@ -1,31 +1,41 @@
 import zarr
 import sys
 from pathlib import Path
+import numpy as np
 from lca.nd.segmentation import segment_nuclei_cellpose_3D
 
 img_path = Path("/data/active/atschan/lattice_light_sheet/zarr/20211118_hiPSC_day-06-Deskewed.zarr")
+img_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_4s\zarr\site_0001.zarr")
 z = zarr.open(img_path)
-layer = 'layer_02'
-timepoint = int(sys.argv[1])
-img = z['intensity_images']['561'][layer][timepoint, :, :, :]
 
-labels = segment_nuclei_cellpose_3D(intensity_image=img,
-                                    diameter=20,
-                                    gpu=True,
-                                    min_size=10,
-                                    anisotropy=200/144,
-                                    cellprob_threshold=0,
-                                    flow_threshold=27,
-                                    apply_filter=True,
-                                    filter_sigma=2.5,
-                                    resample=True)
+keys = [key for key in z.intensity_images.keys()]
+
+out_shape = z['intensity_images'][keys[0]].shape
+out_chunks = z['intensity_images'][keys[0]].chunks
+
+#layer = 'layer_02'
+#timepoint = int(sys.argv[1])
+
 
 lbl_grp = z.create_group('label_images')
-nuc_grp = lbl_grp.create_group('nuclei')
-layer_grp = nuc_grp.create_group(layer)
-d = layer_grp.create_dataset(layer,
-                             shape=np.insert(np.shape(labels), 0, 120),
-                             chunks=[29, 223, 512],
-                             dtype='uint16')
+d = lbl_grp.create_dataset('nuclei',
+                           shape=out_shape,
+                           chunks=out_chunks,
+                           dtype='uint16')
 
-d[timepoint, :, :, :] = labels
+for timepoint in range(100):
+    img = z['intensity_images']['sdcRFP590-JF549'][timepoint, :, :, :]
+
+    labels = segment_nuclei_cellpose_3D(intensity_image=img,
+                                        diameter=180,
+                                        gpu=True,
+                                        min_size=10,
+                                        anisotropy=500/65,
+                                        cellprob_threshold=0,
+                                        flow_threshold=27,
+                                        apply_filter=True,
+                                        filter_sigma=10,
+                                        resample=True)
+
+
+    d[timepoint, :, :, :] = labels

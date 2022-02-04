@@ -29,11 +29,22 @@ illumination_correction = settings['illumination_correction']
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 
-if microscope == 'visicope':
+if microscope == 'visiscope':
 
     channel_names = np.unique(
-        [re.search("(?<=_w[0-9]).*(?=_s)",
+        [re.search("(?<=_w[0-9]).*(?=_)",
                    str(fyle)).group(0) for fyle in img_files])
+
+
+    # iterate over channels and timepoints and save into dataset
+    if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in
+            img_files]):
+        site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
+    else:
+        site_files = img_path.glob('*.%s' % file_extension)
+
+    site_files = [str(fyle) for fyle in site_files]
+    site_files = natsorted(site_files)
 
     # wells = ['A01']
 
@@ -46,6 +57,11 @@ elif microscope == 'cv7k':
     #     [re.search("(?<=_)[a-zA-Z]+[0-9]{2}(?=_T[0-9]{4})",
     #                str(fyle)).group(0) for fyle in img_files])
 
+    # iterate over channels and timepoints and save into dataset
+    site_files = [f for f in img_files if re.search(f'_T[0-9]{{4}}F{site:03d}',
+                                                    str(f))]
+    site_files = natsorted(site_files)
+
 # pre-load the illumination correction files:
 illum_corr = {key: [] for key in channel_names}
 illcorr_files = sorted(illcorr_path.glob('*.png'))
@@ -56,10 +72,6 @@ for fyle in illcorr_files:
             img = io.imread(fyle)
             illum_corr[channel].append(img)
 
-# iterate over channels and timepoints and save into dataset
-site_files = [f for f in img_files if re.search(f'_T[0-9]{{4}}F{site:03d}',
-                                                str(f))]
-site_files = natsorted(site_files)
 
 channel_data = {key: [] for key in channel_names}
 
@@ -76,6 +88,7 @@ for fyle in site_files:
                 channel_data[channel].append(corrected_image.astype('uint16'))
             else:
                 channel_data[channel].append(img)
+
 
 # Open the experiment HDF5 file in "append" mode
 

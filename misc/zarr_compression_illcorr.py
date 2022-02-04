@@ -28,7 +28,7 @@ illumination_correction = settings['illumination_correction']
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 channel_names = np.unique(
-    [re.search("(?<=_w[0-9]).*(?=_s)",
+    [re.search("(?<=_w[0-9]).*(?=_)",
                str(fyle)).group(0) for fyle in img_files])
 
 
@@ -55,6 +55,7 @@ site_files = natsorted(site_files)
 channel_data = {key: [] for key in channel_names}
 
 for fyle in site_files:
+    print(fyle)
     for channel in channel_data:
         if channel in str(fyle):
             if file_extension in ['tif', 'stk']:
@@ -66,7 +67,8 @@ for fyle in site_files:
                 corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
                 channel_data[channel].append(corrected_image.astype('uint16'))
             else:
-                channel_data[channel].append(img)
+                channel_data[channel].append(img[:, 500:1260, 1000:1760])
+
 
 # Open the experiment zarr file and append data
 z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')

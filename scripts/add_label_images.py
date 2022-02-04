@@ -19,8 +19,9 @@ hdf5_path = Path(settings['paths']['hdf5_path'])
 temp_seg_path = Path(settings['paths']['temp_seg_path'])
 file_extension = settings['file_extension']
 
-img_files = temp_seg_path.glob(f'*_s{site}.{file_extension}')
-objects = np.unique([re.search(f"[^\W]+(?=_s{site}.{file_extension})",
+img_files = temp_seg_path.glob(f'*_s{site}.tif')
+img_files = [fyle for fyle in img_files]
+objects = np.unique([re.search(f"[^\W]+(?=_s{site}.tif)",
                                str(fyle)).group(0) for fyle in img_files])
 
 with h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "a") as file:
@@ -32,7 +33,7 @@ with h5py.File(hdf5_path.joinpath('site_%04d.hdf5' % site), "a") as file:
     for obj in objects:
 
         label_images = io.imread(temp_seg_path.joinpath(
-            obj + f'_s{site}.{file_extension}'),
+            obj + f'_s{site}.tif'),
             plugin="tifffile")
 
         # Create a dataset in the file to add label images

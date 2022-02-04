@@ -32,7 +32,7 @@ img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 
 # check if image files contain multiple sites
-if microscope == 'visicope':
+if microscope == 'visiscope':
     if any([bool(re.search('(?<=_s)[0-9]{1,}',
                            str(fyle))) for fyle in img_files]):
         n_sites = len(np.unique(

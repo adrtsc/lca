@@ -10,7 +10,7 @@ SLURM_COMMAND = """#! /bin/sh
 #SBATCH --array=1-{0}
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
-#SBATCH --mem-per-cpu=10000m
+#SBATCH --mem-per-cpu=60000m
 #SBATCH --cpus-per-task=1
 #SBATCH --time=240
 
@@ -32,12 +32,13 @@ img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 
 # check if image files contain multiple sites
-if microscope == 'visicope':
-    if any([bool(re.search('(?<=_s)[0-9]{1,}',
+if microscope == 'visiscope':
+    if any([bool(re.search('(?<=_)[0-9]{1,}',
                            str(fyle))) for fyle in img_files]):
         n_sites = len(np.unique(
-            [int(re.search("(?<=_s)[0-9]{1,}",
+            [int(re.search("(?<=_)[0-9]{1,}",
                            str(fyle)).group(0)) for fyle in img_files]))
+
     else:
         n_sites = 1
 elif microscope == 'cv7k':

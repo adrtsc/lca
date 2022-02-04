@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from lca.ndt.measure import (measure_morphology_3DT,
                              measure_intensity_3DT,
-                             measure_blobs_2DT,
+                             measure_blobs_3DT,
                              measure_tracks_2DT)
 from lca.ndt.util import measure_assignment_2DT
 from lca.util import measure_border_cells
@@ -59,7 +59,7 @@ def extract_features(file, settings, site):
             for channel in object_settings['measure_blobs']['channels']:
                 intensity_images = file['intensity_images'][channel][:]
 
-                blobs = measure_blobs_2DT(
+                blobs = measure_blobs_3DT(
                     intensity_images,
                     label_images,
                     min_sigma=blob_settings['min_sigma'],
