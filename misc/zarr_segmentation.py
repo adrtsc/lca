@@ -1,36 +1,45 @@
 import zarr
 import sys
 from pathlib import Path
-import numpy as np
 from lca.nd.segmentation import segment_nuclei_cellpose_3D
 
-img_path = Path("/data/active/atschan/lattice_light_sheet/zarr/20211118_hiPSC_day-06-Deskewed.zarr")
-img_path = Path(r"Z:\20211111_hiPSC_MS2\GFP_5_RFP_15_4s\zarr\site_0001.zarr")
-z = zarr.open(img_path)
 
-keys = [key for key in z.intensity_images.keys()]
+# define the site this job should process
+timepoint = int(sys.argv[1])
 
-out_shape = z['intensity_images'][keys[0]].shape
-out_chunks = z['intensity_images'][keys[0]].chunks
+# load settings
+settings_path = Path(sys.argv[2])
+with open(settings_path, 'r') as stream:
+    settings = yaml.safe_load(stream)
 
-#layer = 'layer_02'
-#timepoint = int(sys.argv[1])
+level = 'level_00'
+
+# get all paths from settings
+zarr_path = Path(settings['paths']['zarr_path'])
+
+zarr_files = zarr_path.glob('*.zarr')
+zarr_files = [fyle for fyle in zarr_files]
+
+cl_filename = Path(r"Z:\20220218_hiPSC_MS2\apoc\20220218_classifier.cl")
+classifier = apoc.PixelClassifier(cl_filename)
 
 
-lbl_grp = z.create_group('label_images')
-d = lbl_grp.create_dataset('nuclei',
-                           shape=out_shape,
-                           chunks=out_chunks,
-                           dtype='uint16')
+for fyle in zarr_files:
 
-for timepoint in range(100):
-    img = z['intensity_images']['sdcRFP590-JF549'][timepoint, :, :, :]
+    z = zarr.open(fyle, mode='a')
+
+    keys = [key for key in z.intensity_images.keys()]
+
+    out_shape = z['intensity_images'][keys[0]][level].shape
+    out_chunks = z['intensity_images'][keys[0]][level].chunks
+
+    img = z['intensity_images']['sdcRFP590-JF549'][level][timepoint, :, :, :]
 
     labels = segment_nuclei_cellpose_3D(intensity_image=img,
-                                        diameter=180,
-                                        gpu=True,
+                                        diameter=120,
+                                        gpu=False,
                                         min_size=10,
-                                        anisotropy=500/65,
+                                        anisotropy=9.25,
                                         cellprob_threshold=0,
                                         flow_threshold=27,
                                         apply_filter=True,
@@ -38,4 +47,13 @@ for timepoint in range(100):
                                         resample=True)
 
 
+    if not hasattr(z, 'label_images'):
+        z.create_group('label_images')
+
+    d = z['label_images'].create_dataset('nuclei',
+                                         shape=out_shape,
+                                         chunks=out_chunks,
+                                         dtype='uint16')
+
     d[timepoint, :, :, :] = labels
+

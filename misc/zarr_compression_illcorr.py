@@ -19,7 +19,7 @@ with open(settings_path, 'r') as stream:
 # get all paths from settings
 img_path = Path(settings['paths']['img_path'])
 illcorr_path = Path(settings['paths']['illcorr_path'])
-output_path = Path(settings['paths']['hdf5_path'])
+output_path = Path(settings['paths']['zarr_path'])
 magnification = settings['magnification']
 file_extension = settings['file_extension']
 illumination_correction = settings['illumination_correction']
@@ -28,7 +28,7 @@ illumination_correction = settings['illumination_correction']
 img_files = img_path.glob('*.%s' % file_extension)
 img_files = [fyle for fyle in img_files]
 channel_names = np.unique(
-    [re.search("(?<=_w[0-9]).*(?=_)",
+    [re.search("(?<=_w[0-9]).*(?=_s)",
                str(fyle)).group(0) for fyle in img_files])
 
 
@@ -67,8 +67,7 @@ for fyle in site_files:
                 corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
                 channel_data[channel].append(corrected_image.astype('uint16'))
             else:
-                channel_data[channel].append(img[:, 500:1260, 1000:1760])
-
+                channel_data[channel].append(img)
 
 # Open the experiment zarr file and append data
 z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')
@@ -80,14 +79,43 @@ chunk = tuple(chunk)
 grp = z.create_group("intensity_images")
 
 for channel in channel_data:
-    # Create a dataset in the file
-    dataset = grp.create_dataset(
-        channel,
-        shape=np.shape(np.squeeze(np.stack(channel_data[channel]))),
-        chunks=chunk,
-        dtype='uint16')
 
-    dataset[:] = np.stack(channel_data[channel])
+    pyramid = generate_pyramid(np.stack(channel_data[channel]))
 
-    dataset.attrs["element_size_um"] = (1, 6.5 / magnification, 6.5 / magnification)
+    # Create a group for channel
+    channel_grp = grp.create_group(channel)
 
+    for idx, level in enumerate(pyramid):
+        # create dataset for each resolution level
+        dataset = channel_grp.create_dataset(
+            f'level_{idx:02d}',
+            shape=np.shape(level),
+            chunks=chunk,
+            dtype='uint16')
+
+        dataset[:] = level
+
+        dataset.attrs["element_size_um"] = (1,
+                                            6.5 / magnification,
+                                            6.5 / magnification)
+
+
+def generate_pyramid(img, levels=4):
+
+    tp_list = list(img)
+    pyramids = []
+
+    for tp_idx, timepoint in enumerate(tp_list):
+        # generate the pyramid
+        pyramid = tuple(pyramid_gaussian(timepoint,
+                                         max_layer=levels,
+                                         downscale=2,
+                                         preserve_range=True,
+                                         channel_axis=0))
+
+        pyramids.append(pyramid)
+
+    output = [np.stack(
+        [pyramid[i] for pyramid in pyramids]) for i in range(levels)]
+
+    return output

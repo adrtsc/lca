@@ -1,0 +1,79 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  mCherryKatrina: magenta
+  sdcYFP: yellow
+file_extension: tif
+magnification: 100
+scaling: 1
+spacing:
+- 1
+- 1
+illumination_correction: false
+cellpose:
+  nuclei:
+    diameter: 300
+    resample: false
+    cellprob_threshold: -3
+    flow_threshold: 20
+    min_size: 2500
+    channel: sdcCy5
+    do_3D: false
+    apply_filter: true
+  cells:
+    model: cyto
+    diameter: 500
+    resample: false
+    cellprob_threshold: -2.9
+    flow_threshold: 27
+    min_size: 35000
+    channel: sdcGFP
+    nuclei_channel: sdcCy5
+    do_3D: false
+    apply_filter: true
+  cytoplasm: true
+objects:
+  cells:
+    assigned_objects:
+    - nuclei
+    - cytoplasm
+    measure_blobs: false
+    measure_intensity: false
+    measure_morphology: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 125
+      max_gap_closing_distance: 125
+      allow_splitting: true
+      allow_merging: false
+  cytoplasm:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+      - sdcGFP
+      settings:
+        exclude_border: true
+        max_sigma: 15
+        min_sigma: 1
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.0005
+    measure_intensity:
+    - sdcGFP
+    - mCherryKatrina
+    measure_morphology: true
+    measure_tracks: false
+  nuclei:
+    assigned_objects: []
+    measure_blobs: false
+    measure_intensity: false
+    measure_morphology: true
+    measure_tracks: false
+paths:
+  feature_path: /data/active/atschan/20211129_Katrina_test/features/
+  hdf5_path: /data/active/atschan/20211129_Katrina_test/
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: /data/active/katrim/Sec16/20211126_Sec16_live/wellC1_spirochrome650/exp2/
+  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

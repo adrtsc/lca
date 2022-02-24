@@ -9,7 +9,7 @@ def segment_nuclei_cellpose_2DT(intensity_images, diameter, resample=True,
                                 flow_threshold=0.4, cellprob_threshold=0,
                                 min_size=2500, gpu=False, torch=False,
                                 apply_filter=True, do_3D=False,
-                                anisotropy=1.0):
+                                anisotropy=1.0, **kwargs):
 
     label_images = []
 
@@ -39,7 +39,7 @@ def segment_nuclei_cellpose_3DT(intensity_images, diameter, resample=False,
                                 flow_threshold=0.4, cellprob_threshold=0,
                                 min_size=2500, gpu=False, torch=False,
                                 apply_filter=True, do_3D=True,
-                                anisotropy=1.0):
+                                anisotropy=1.0, **kwargs):
 
     label_images = []
 
@@ -70,8 +70,8 @@ def segment_nuclei_cellpose_3DT(intensity_images, diameter, resample=False,
 def segment_cells_cellpose_2DT(cells_intensity_images,
                                nuclei_intensity_images=None, model='cyto',
                                diameter=100, resample=True, flow_threshold=0.4,
-                               cellprob_threshold=0, min_size=10000,
-                               gpu=False, torch=False, apply_filter=True):
+                               cellprob_threshold=0, min_size=10000, gpu=False,
+                               torch=False, apply_filter=True, **kwargs):
 
     label_images = []
 

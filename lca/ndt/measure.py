@@ -27,17 +27,19 @@ def measure_morphology_2DT(label_images):
 def measure_morphology_3DT(label_images, spacing):
 
     regionprops = []
+    inv_spacing = spacing.copy()
+    inv_spacing.reverse()
 
     # measure regionprops for each timepoine
     for idx, label_image in enumerate(list(label_images)):
-        label_image = to_itk(label_image, spacing=spacing)
+        label_image = to_itk(label_image, spacing=inv_spacing)
         current_regionprops = get_shape_features_dataframe(label_image)
         current_regionprops['timepoint'] = idx
 
         # adjust some of the column names that are relevant for tracking
-        current_regionprops.rename(columns={'Centroid_y': 'centroid-0',
-                                            'Centroid_x': 'centroid-1',
-                                            'Centroid_z': 'centroid-3',
+        current_regionprops.rename(columns={'Centroid_y': 'centroid-1',
+                                            'Centroid_x': 'centroid-2',
+                                            'Centroid_z': 'centroid-0',
                                             'BoundingBox_lower_x': 'bbox-2',
                                             'BoundingBox_upper_x': 'bbox-5',
                                             'BoundingBox_lower_y': 'bbox-1',
@@ -94,12 +96,14 @@ def measure_intensity_2DT(label_images, intensity_images):
 def measure_intensity_3DT(label_images, intensity_images, spacing):
 
     regionprops = []
+    inv_spacing = spacing.copy()
+    inv_spacing.reverse()
 
     for idx, label_image in enumerate(list(label_images)):
         intensity_image = intensity_images[idx, :, :]
 
-        label_image = to_itk(label_image, spacing=spacing)
-        intensity_image = to_itk(intensity_image, spacing=spacing)
+        label_image = to_itk(label_image, spacing=inv_spacing)
+        intensity_image = to_itk(intensity_image, spacing=inv_spacing)
 
         current_regionprops = get_intensity_features_dataframe(label_image,
                                                                intensity_image)
@@ -174,13 +178,17 @@ def measure_blobs_3DT(intensity_images,
     return blobs
 
 
-def measure_tracks_2DT(df, max_distance,
+def measure_tracks_2DT(df,
+                       max_distance,
                        time_window,
                        max_split_distance,
                        max_gap_closing_distance,
                        allow_splitting=True,
                        allow_merging=False,
-                       modulate_centroids=True):
+                       modulate_centroids=True,
+                       centroid_0='centroid-0',
+                       centroid_1='centroid-1',
+                       ):
 
     tracker = LapTracker(max_distance=max_distance,
                          time_window=time_window,
@@ -189,7 +197,7 @@ def measure_tracks_2DT(df, max_distance,
                          allow_splitting=allow_splitting,
                          allow_merging=allow_merging)
 
-    columns = ['centroid-0', 'centroid-1', 'timepoint', 'label']
+    columns = [centroid_0, centroid_1, 'timepoint', 'label']
     df['track_id'] = tracker.track_df(df, identifiers=columns,
                                       modulate_centroids=modulate_centroids)
 

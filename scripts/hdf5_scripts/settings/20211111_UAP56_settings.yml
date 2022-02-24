@@ -1,0 +1,51 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590-JF549: red
+  sdcYFP: yellow
+file_extension: stk
+magnification: 100
+spacing:
+- 1
+- 1
+- 6.15
+scaling: 6.15
+illumination_correction: false
+cellpose:
+  nuclei:
+    model: nuclei
+    diameter: 150
+    resample: true
+    cellprob_threshold: -2.86
+    flow_threshold: 7.5
+    do_3D: true
+    gpu: true
+    min_size: 2500
+    channel: sdcRFP590-JF549
+    nuclei_channel: false
+    apply_filter: true
+  cytoplasm: false
+objects:
+  nuclei:
+    assigned_objects: []
+    measure_blobs: false
+    measure_intensity:
+    - sdcGFP
+    - sdcRFP590-JF549
+    measure_morphology: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 125
+      max_gap_closing_distance: 125
+      allow_splitting: false
+      allow_merging: false
+paths:
+  feature_path: Z:/20211111_hiPSC_MS2/GFP_5_RFP_15_Cy5_15_6s_UAP56/short/features
+  hdf5_path: Z:/20211111_hiPSC_MS2/GFP_5_RFP_15_Cy5_15_6s_UAP56/short/hdf5
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: Z:/20211111_hiPSC_MS2/GFP_5_RFP_15_Cy5_15_6s_UAP56/short/
+  temp_seg_path: Z:/20211111_hiPSC_MS2/GFP_5_RFP_15_Cy5_15_6s_UAP56/short/temp_segmentation/
+
+

@@ -1,0 +1,70 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590: magenta
+  sdcYFP: yellow
+file_extension: tif
+magnification: 60
+cellpose:
+  nuclei:
+    diameter: 200
+    resample: false
+    cellprob_threshold: -1.18
+    flow_threshold: 11.89
+    channel: sdcDAPIxmRFPm
+  cells:
+    diameter: 200
+    resample: false
+    cellprob_threshold: -0.71
+    flow_threshold: 26
+    channel: sdcCy5
+    nuclei_channel: sdcDAPIxmRFPm
+  cytoplasm: true
+objects:
+  cells:
+    assigned_objects:
+    - nuclei
+    - cytoplasm
+    measure_blobs: false
+    measure_intensity:
+    - sdcGFP
+    - sdcDAPIxmRFPm
+    measure_morphology: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 125
+      max_gap_closing_distance: 125
+      allow_splitting: true
+      allow_merging: false
+  cytoplasm:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+      - sdcGFP
+      settings:
+        exclude_border: true
+        max_sigma: 5
+        min_sigma: 1
+        num_sigma: 5
+        overlap: 0.5
+        threshold: 0.0025
+    measure_intensity:
+    - sdcGFP
+    measure_morphology: true
+    measure_tracks: false
+  nuclei:
+    assigned_objects: []
+    measure_blobs: false
+    measure_intensity:
+    - sdcGFP
+    - sdcDAPIxmRFPm
+    measure_morphology: true
+    measure_tracks: false
+paths:
+  feature_path: /data/active/BIO325_group1/20211018_Sec16/features
+  hdf5_path: /data/active/BIO325_group1/20211018_Sec16/hdf5
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: /data/active/BIO325_group1/20211018_Sec16/MIP/
+  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation

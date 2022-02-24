@@ -1,0 +1,62 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdcGFP: green
+  sdcRFP590: magenta
+  sdcYFP: yellow
+file_extension: tif
+magnification: 60
+cellpose:
+  cells:
+    diameter: 160
+    resample: false
+    cellprob_threshold: 0.94
+    flow_threshold: 26
+    channel: sdcCy5
+    nuclei_channel: false
+  cytoplasm: false
+objects:
+  cells:
+    assigned_objects: [cells_eroded, cells_eroded_2]
+    measure_blobs:
+      channels:
+      - sdcGFP
+      settings:
+        exclude_border: true
+        max_sigma: 4Okay, 
+        min_sigma: 1
+        num_sigma: 10
+        overlap: 0.5
+        threshold: 0.001
+    measure_intensity:
+    - sdcGFP
+    - sdcCy5
+    measure_morphology: true
+    measure_tracks:
+      max_distance: 125
+      time_window: 3
+      max_split_distance: 125
+      max_gap_closing_distance: 125
+      allow_splitting: true
+      allow_merging: false
+  cells_eroded:
+    assigned_objects: [ ]
+    measure_blobs: false
+    measure_intensity:
+      - sdcGFP
+    measure_morphology: false
+    measure_tracks: false
+  cells_eroded_2:
+    assigned_objects: [ ]
+    measure_blobs: false
+    measure_intensity:
+      - sdcGFP
+    measure_morphology: false
+    measure_tracks: false
+paths:
+  feature_path: X:/20211020_G3BP1/replicate_2/features
+  hdf5_path: X:/20211020_G3BP1/replicate_2/hdf5
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: X:/20211020_G3BP1/replicate_2/
+  temp_seg_path: /data/active/atschan/20211014_bio325_test/temp_segmentation
+
