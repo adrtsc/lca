@@ -9,7 +9,7 @@ import SimpleITK as sitk
 timepoint = 0
 
 # load settings
-settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220218_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220317_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
@@ -29,7 +29,7 @@ fyle = zarr_files[0]
 
 z = zarr.open(fyle, mode='a')
 
-img = z['intensity_images'][channel][level][timepoint, :, 0:50, 0:50]
+img = z['intensity_images'][channel][level][timepoint, :, 0:100, 0:100]
 
 #img = ndi.median_filter(img, 3)
 filter_sigma=1

@@ -63,30 +63,31 @@ def visualize_site(settings,
 
     if blobs:
         # add blobs
-        blob_files = feature_path.glob('*.csv')
-        blob_files = [blob_file for blob_file in blob_files if 'site_%04d_blobs_' % site in str(blob_file)]
+        blob_files = feature_path.glob('distance_measurements/*.csv')
+        blob_files = [blob_file for blob_file in blob_files if 'site_%04d' % site in str(blob_file)]
 
 
         for blob_file in blob_files:
             blobs = pd.read_csv(blob_file)
             filter = blobs['timepoint'].isin(np.arange(start_timepoint, end_timepoint))
             blobs = blobs[filter]
-            blobs['centroid-1_scaled'] = blobs['centroid-1'] / 2**level
-            blobs['centroid-2_scaled'] = blobs['centroid-2'] / 2**level
+            blobs['centroid-1_scaled'] = blobs['centroid-1_blobs'] / 2**level
+            blobs['centroid-2_scaled'] = blobs['centroid-2_blobs'] / 2**level
+            blobs['centroid-0_scaled'] = blobs['centroid-0_blobs'] / 9.25
             scaling_blobs = scaling.copy()
             scaling_blobs.insert(0, 1)
-            viewer.add_points(blobs[['timepoint', 'centroid-0', 'centroid-1_scaled', 'centroid-2_scaled']], name=str(blob_file).replace('.csv', '').split('site_%04d_' % site)[1],
+            viewer.add_points(blobs[['timepoint', 'centroid-0_scaled', 'centroid-1_scaled', 'centroid-2_scaled']], name=str(blob_file).replace('.csv', '').split('site_%04d' % site)[1],
                               face_color='transparent',
                               edge_color='white',
-                              size=blobs['size']/2**level,
+                              size=blobs['size_blobs']/2**level,
                               visible=False,
                               scale=scaling_blobs)
 
-
+    return viewer
 
 
 # load settings
-with open('scripts/settings/20220218_settings.yml', 'r') as stream:
+with open('scripts/settings/20220224_settings.yml', 'r') as stream:
     settings = yaml.safe_load(stream)
 
-visualize_site(settings, 2, start_timepoint=0, end_timepoint=60, level=3, boundaries=False, blobs=True, tracks=True, labels=False)
+viewer = visualize_site(settings, 1, start_timepoint=0, end_timepoint=60, level=1, boundaries=False, blobs=True, tracks=True, labels=True)

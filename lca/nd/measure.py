@@ -73,6 +73,9 @@ def measure_blobs_2D(intensity_image,
                                          'centroid-1',
                                          'size'])
 
+    # adjust size to represent diameter rather than sigma
+    blobs['size'] = blobs['size']*np.sqrt(2)*2
+
     if label_image is not None:
         object_labels = []
 
@@ -92,11 +95,11 @@ def measure_blobs_2D(intensity_image,
 
     for index, row in blobs.iterrows():
 
-        rr, cc = disk(tuple(row[['centroid-0', 'centroid-1']]), row['size'],
+        rr, cc = disk(tuple(row[['centroid-0', 'centroid-1']]), row['size']/2,
                       shape=np.shape(intensity_image))
 
         rr_bg, cc_bg = disk(tuple(row[['centroid-0', 'centroid-1']]),
-                            2 * row['size'],
+                            row['size'],
                             shape=np.shape(intensity_image))
 
         pixels = intensity_image[rr, cc]
@@ -121,10 +124,6 @@ def measure_blobs_2D(intensity_image,
     blobs['var_intensity'] = var_intensity
     blobs['mean_background_intensity'] = mean_bg_intensity
     blobs['SNR'] = np.array(mean_intensity) / np.array(mean_bg_intensity)
-
-    # adjust size to represent diameter rather than sigma
-
-    blobs['size'] = blobs['size']*np.sqrt(2)*2
 
     return blobs
 
@@ -151,6 +150,9 @@ def measure_blobs_3D(intensity_image,
                                          'centroid-2',
                                          'size'])
 
+    # adjust size to represent diameter rather than sigma
+    blobs['size'] = blobs['size']*np.sqrt(2)*2
+
     if label_image is not None:
         object_labels = []
 
@@ -173,11 +175,11 @@ def measure_blobs_3D(intensity_image,
 
         c_img = intensity_image[row['centroid-0'].astype("int"), :, :]
 
-        rr, cc = disk(tuple(row[['centroid-1', 'centroid-2']]), row['size'],
+        rr, cc = disk(tuple(row[['centroid-1', 'centroid-2']]), row['size']/2,
                       shape=np.shape(c_img))
 
         rr_bg, cc_bg = disk(tuple(row[['centroid-1', 'centroid-2']]),
-                            2 * row['size'],
+                            row['size'],
                             shape=np.shape(c_img))
 
         pixels = c_img[rr, cc]
@@ -203,9 +205,6 @@ def measure_blobs_3D(intensity_image,
     blobs['mean_background_intensity'] = mean_bg_intensity
     blobs['SNR'] = np.array(mean_intensity) / np.array(mean_bg_intensity)
 
-    # adjust size to represent diameter rather than sigma
-
-    blobs['size'] = blobs['size']*np.sqrt(2)*2
 
     return blobs
 

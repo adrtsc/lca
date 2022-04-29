@@ -1,0 +1,66 @@
+channel_colors:
+  C04: red
+  C01: blue
+  C02: green
+  C03: red
+file_extension: tif
+magnification: 60
+microscope: cv7k
+spacing:
+- 1
+- 1
+- 9.25
+scaling: 9.25
+illumination_correction: true
+cellpose:
+  nuclei:
+    model: nuclei
+    diameter: 30
+    resample: true
+    cellprob_threshold: -8
+    flow_threshold: 27
+    do_3D: true
+    gpu: false
+    min_size: 100
+    channel: C03
+    nuclei_channel: false
+    apply_filter: true
+    filter_sigma: 1
+    level: level_03
+  cytoplasm: false
+objects:
+  nuclei:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+        - C03
+      settings:
+        exclude_border: true
+        max_sigma: 2
+        min_sigma: 2
+        num_sigma: 1
+        overlap: 0.5
+        threshold: 0.00025
+    measure_intensity:
+      sdc-GFP: level_03
+      sdc-RFP-605-52: level_03
+    measure_morphology: level_03
+    measure_tracks:
+      max_distance: 10
+      time_window: 3
+      max_split_distance: 0
+      max_gap_closing_distance: 15
+      allow_splitting: false
+      allow_merging: false
+      centroid_0: centroid-1
+      centroid_1: centroid-2
+paths:
+  feature_path: Z:/20220407_hiPSC_MS2_CV7K/features
+  hdf5_path: Z:/20220407_hiPSC_MS2_CV7K/hdf5
+  zarr_path: Z:/20220407_hiPSC_MS2_CV7K/zarr
+  illcorr_path: Z:/20220317_flatfield_correction_60x_oil/
+  img_path: Z:/20220407_hiPSC_MS2_CV7K/
+  temp_seg_path: Z:/20220407_hiPSC_MS2_CV7K/temp_segmentation
+
+
+

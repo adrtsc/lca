@@ -32,7 +32,6 @@ setup(name='lca',
             'scipy',
             'sklearn',
             'pyyaml',
-            'napari-feature-visualization @ git+https://github.com/adrtsc/napari-feature-visualization',
             'napari-blob-detection @ git+https://github.com/adrtsc/napari-blob-detection',
             #'sslap @ git+https://github.com/OllieBoyne/sslap.git',
       ]

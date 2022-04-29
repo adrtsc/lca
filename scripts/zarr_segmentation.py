@@ -15,7 +15,7 @@ with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
 # define which level should be used for segmentation
-level = 'level_03'
+level = settings['cellpose']['nuclei']['level']
 
 # define which channel should be used for segmentation
 channel = settings['cellpose']['nuclei']['channel']
@@ -33,6 +33,7 @@ for fyle in zarr_files:
 
     keys = [key for key in z.intensity_images.keys()]
 
+    output_spacing = z[f'intensity_images/{channel}/{level}'].attrs['element_size_um']
     out_shape = z['intensity_images'][keys[0]][level].shape
     out_chunks = z['intensity_images'][keys[0]][level].chunks
 
@@ -53,10 +54,11 @@ for fyle in zarr_files:
                          dtype='uint16')
 
     z[f'label_images/nuclei/{level}'][timepoint, :, :, :] = labels
+    z[f'label_images/nuclei/{level}'].attrs["element_size_um"] = output_spacing
 
     # resize the label image for other levels
 
-    levels = [key for key in z['intensity_images']['sdc-GFP']]
+    levels = [key for key in z['intensity_images'][channel]]
     levels.remove(level)
 
     for lvl in levels:
@@ -72,15 +74,12 @@ for fyle in zarr_files:
                          order=0)
 
         if not hasattr(z, f'label_images/nuclei/{lvl}'):
-            d = z.create_dataset(f'label_images/nuclei/{lvl}',
-                                shape=out_shape,
-                                chunks=out_chunks,
-                                dtype='uint16')
+            z.create_dataset(f'label_images/nuclei/{lvl}',
+                             shape=out_shape,
+                             chunks=out_chunks,
+                             dtype='uint16')
 
-            d.attrs["element_size_um"] = output_spacing
-
+        z[f'label_images/nuclei/{lvl}'].attrs["element_size_um"] = output_spacing
         z[f'label_images/nuclei/{lvl}'][timepoint, :, :, :] = resized
-
-
 
 

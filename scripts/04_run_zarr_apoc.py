@@ -47,15 +47,14 @@ if microscope == 'visiscope':
 
     else:
         n_sites = 1
+		
 elif microscope == 'cv7k':
+    # calling it sites, but they are timepoints
     n_sites = len(np.unique(
-        [int(re.search("(?<=F)[0-9]{3}",
-                       str(fyle)).group(0)) for fyle in img_files]))
+        [re.search("T[0-9]{4}(?=F)",
+                   str(fyle)).group(0) for fyle in img_files]))
 
 
-# TO-DO: parse timepoint
-
-n_sites = 60
 
 with open("temp.sh", "w") as f:
     f.write(SLURM_COMMAND.format(n_sites, settings_path))

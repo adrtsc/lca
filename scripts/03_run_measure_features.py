@@ -39,7 +39,7 @@ if microscope == 'visiscope':
             [int(re.search("(?<=_s)[0-9]{1,}",
                            str(fyle)).group(0)) for fyle in img_files]))
     else:
-        n_sites = 1
+        n_sites = 25
 elif microscope == 'cv7k':
     n_sites = len(np.unique(
         [int(re.search("(?<=F)[0-9]{3}",

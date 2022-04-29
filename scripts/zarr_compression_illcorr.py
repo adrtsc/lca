@@ -4,6 +4,8 @@ from pathlib import Path
 from skimage import io
 from natsort import natsorted
 from skimage.transform import pyramid_gaussian
+from skimage.restoration import rolling_ball, ellipsoid_kernel
+from skimage.filters import gaussian
 import re
 import cv2
 import yaml
@@ -44,6 +46,15 @@ for fyle in illcorr_files:
             illum_corr[channel].append(img)
 
 
+def correct_illumination(img, dark_channel, flat_channel):
+
+    dark = np.repeat(dark_channel[np.newaxis, :, :], img.shape[0], axis=0)
+    flat = flat_channel / np.max(flat_channel)
+
+    corrected_img = cv2.subtract(img, dark) / flat
+
+    return corrected_img
+
 # iterate over channels and timepoints and save into dataset
 if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in img_files]):
     site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
@@ -65,7 +76,9 @@ for fyle in site_files:
                 img = io.imread(fyle)
 
             if illumination_correction:
-                corrected_image = (cv2.subtract(img, illum_corr[channel][0])) / (illum_corr[channel][1]/np.max(illum_corr[channel][1]))
+                corrected_image = correct_illumination(img,
+                                                       illum_corr[channel][0],
+                                                       illum_corr[channel][1])
                 channel_data[channel].append(corrected_image.astype('uint16'))
             else:
                 channel_data[channel].append(img)
@@ -91,21 +104,24 @@ def generate_pyramid(img, levels=4):
 
     return output
 
+
 # Open the experiment zarr file and append data
-z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')
+if output_path.joinpath(f'site_{site:04}.zarr').exists():
+    z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='a')
+    print('opening in append mode')
+else:
+    z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')
+    print('making new file')
 
 chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
 chunk[0] = 1
 chunk = tuple(chunk)
 
-grp = z.create_group("intensity_images")
-
 for channel in channel_data:
 
-    # Create a group for channel
-    channel_grp = grp.create_group(channel)
-
     for tp_idx, timepoint in enumerate(channel_data[channel]):
+
+        # timepoint = subtract_background(timepoint, 500, 10)
 
         pyramid = tuple(pyramid_gaussian(timepoint,
                                          max_layer=3,
@@ -115,20 +131,20 @@ for channel in channel_data:
 
         for idx, level in enumerate(pyramid):
             # create dataset for each resolution level
-            if tp_idx == 0:
-                dataset = channel_grp.create_dataset(
-                    f'level_{idx:02d}',
+            if not hasattr(z, f'intensity_images/{channel}/level_{idx:02d}'):
+                d = z.create_dataset(
+                    f'intensity_images/{channel}/level_{idx:02d}',
                     shape=np.insert(np.shape(level),
                                     0,
                                     len(channel_data[channel])),
                     chunks=chunk,
                     dtype='uint16')
 
-                dataset.attrs["element_size_um"] = (1,
-                                                    6.5 / mag * 2 ** idx,
-                                                    6.5 / mag * 2 ** idx)
+                d.attrs["element_size_um"] = (1,
+                                              6.5 / mag * 2 ** idx,
+                                              6.5 / mag * 2 ** idx)
 
-            channel_grp[f'level_{idx:02d}'][tp_idx, :, :, :] = level
+            z[f'intensity_images/{channel}/level_{idx:02d}'][tp_idx, :, :, :] = level
     
             
 

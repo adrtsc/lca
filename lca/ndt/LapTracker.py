@@ -618,8 +618,8 @@ class LapTracker():
 
         if modulate_centroids:
             # modulate centroids
-            self.df['centroid-0'] = self.df['centroid-0'] + uniform(size=len(self.df))
-            self.df['centroid-1'] = self.df['centroid-1'] + uniform(size=len(self.df))
+            self.df['centroid-0'] = self.df['centroid-0'] + uniform(size=len(self.df), low=0.0001, high=0.005)
+            self.df['centroid-1'] = self.df['centroid-1'] + uniform(size=len(self.df), low=0.0001, high=0.005)
         # add unique identifiers to df
         self.df['unique_id'] = list(range(0, self.number_of_objects))
         # link timepoints to get segments
