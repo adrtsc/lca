@@ -26,7 +26,7 @@ def main():
 
     anisotropy = spacing[0]/spacing[1]
 
-    df = pd.read_csv(feature_path.joinpath("20220224_fv_preprocessed.csv"))
+    df = pd.read_csv(feature_path.joinpath("20220224_fv_preprocessed_with_mock.csv"))
 
     df = df[df.site == (site-1)]
 

@@ -4,6 +4,7 @@ import functools
 from lca.ndt.LapTracker import LapTracker
 from lca.nd.measure import measure_morphology_2D
 from lca.nd.measure import measure_intensity_2D
+from lca.nd.measure import measure_coordinates_3D
 from lca.nd.measure import measure_blobs_2D
 from lca.nd.measure import measure_blobs_3D
 from abbott.itk_measure import (get_shape_features_dataframe,
@@ -142,6 +143,25 @@ def measure_blobs_3DT(intensity_images,
 
         current_blobs['timepoint'] = idx
         blobs = pd.concat([blobs, current_blobs])
+
+    return blobs
+
+
+def measure_coordinates_3DT(blobs,
+                            intensity_images,
+                            sigma):
+    result = []
+
+    for idx, intensity_image in enumerate(list(intensity_images)):
+        print(idx)
+        c_blobs = blobs.loc[blobs['timepoint'] == idx]
+        intensity_image = intensity_images[idx, :, :, :]
+        current_blobs = measure_coordinates_3D(c_blobs,
+                                               intensity_image,
+                                               sigma)
+        result.append(current_blobs)
+
+    blobs = pd.concat(result)
 
     return blobs
 

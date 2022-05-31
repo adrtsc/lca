@@ -15,6 +15,8 @@ feature_path = Path(settings['paths']['feature_path'])
 
 fv = pd.read_csv(feature_path.joinpath('site_0003_nuclei_feature_values.csv'))
 
+import btrack
+
 
 from lca.ndt.measure_new import measure_tracks_2DT
 import trackpy as tp
