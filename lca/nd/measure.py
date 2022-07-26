@@ -7,6 +7,16 @@ from skimage.draw import disk
 
 
 def measure_morphology_2D(label_image):
+    """
+        Measure the morphology features of a 2D label image.
+        Parameters:
+            label_image: ndarray
+                An ndarray in which each object is labelled with a unique value.
+        Returns:
+            regionprops: pandas.DataFrame
+                Pandas DataFrame containing the measured morphology features for
+                every object.
+    """
 
     # measure regionprops for each timepoint
     features = ('label', 'area', 'bbox', 'bbox_area', 'centroid',
@@ -41,6 +51,18 @@ def measure_morphology_2D(label_image):
 
 
 def measure_intensity_2D(label_image, intensity_image):
+    """
+        Measure the intensity features of a 2D label image.
+        Parameters:
+            label_image: ndarray
+                An ndarray in which each object is labelled with a unique value.
+            intensity_image: ndarray
+                An ndarray containing the intensity values that should be measured.
+        Returns:
+            regionprops: pandas.DataFrame
+                Pandas DataFrame containing the measured intensity features for
+                every object.
+    """
 
     features = ('label', 'max_intensity', 'mean_intensity', 'min_intensity')
     regionprops = pd.DataFrame(
@@ -60,6 +82,17 @@ def measure_blobs_2D(intensity_image,
                      threshold=0.001,
                      overlap=0.5,
                      exclude_border=True):
+    """
+        Detect blobs in a 2D label image and measure some features of the blobs.
+        Parameters:
+            intensity_image: ndarray
+                An ndarray containing the image in which blobs should be detected
+                and measured.
+            other parameters: see skimage.feature.blob_log
+        Returns:
+            blobs: pandas.DataFrame
+                Pandas DataFrame containing the detected blobs.
+    """
 
     blobs = blob_log(intensity_image,
                      min_sigma=min_sigma,
