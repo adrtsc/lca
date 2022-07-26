@@ -5,7 +5,8 @@ import re
 import yaml
 import sys
 
-IMG_DIMS = [2160, 2560]
+IMG_DIMS = {'cv7k': [2160, 2560], 'visiscope': [2048, 2048]
+PIXEL_SIZE_UM = 6.5
 N_LEVELS = 4
 
 # load settings
@@ -18,10 +19,12 @@ img_path = Path(settings['paths']['img_path'])
 output_path = Path(settings['paths']['zarr_path'])
 mag = settings['magnification']
 file_extension = settings['file_extension']
+microscope = settings['microscope']
 
 
 img_files = img_path.glob(f'*.{file_extension}')
 img_files = [fyle for fyle in img_files]
+img_dims = IMG_DIMS[microscope]
 
 
 channel_names = np.unique(
@@ -37,8 +40,9 @@ n_tp = len(np.unique(
     [re.search("T[0-9]{4}(?=F)",
                str(fyle)).group(0) for fyle in img_files]))
 
-chunk = (1, n_slices, *IMG_DIMS)
 
+
+chunk = (1, n_slices, *IMG_DIMS)
 
 for site in range(1, n_sites+1):
     # Open the experiment zarr file
@@ -54,11 +58,11 @@ for site in range(1, n_sites+1):
                 d = z.create_dataset(
                     f'intensity_images/{channel}/level_{level:02d}',
                     shape=[n_tp, n_slices,
-                           IMG_DIMS[0]/2**level,
-                           IMG_DIMS[1]/2**level],
+                           img_dims[0]/2**level,
+                           img_dims[1]/2**level],
                     chunks=chunk,
                     dtype='uint16')
-        
+
                 d.attrs["element_size_um"] = (1,
-                                              6.5 / mag * 2 ** level,
-                                              6.5 / mag * 2 ** level)
+                                              PIXEL_SIZE_UM / mag * 2 ** level,
+                                              PIXEL_SIZE_UM / mag * 2 ** level)

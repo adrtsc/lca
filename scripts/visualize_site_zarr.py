@@ -87,7 +87,7 @@ def visualize_site(settings,
 
 
 # load settings
-with open('scripts/settings/20220414_settings.yml', 'r') as stream:
+with open('scripts/settings/20220224_settings.yml', 'r') as stream:
     settings = yaml.safe_load(stream)
 
-viewer = visualize_site(settings, 2, start_timepoint=0, end_timepoint=79, level=3, boundaries=False, blobs=False, tracks=True, labels=False)
+viewer = visualize_site(settings, 2, start_timepoint=0, end_timepoint=60, level=0, boundaries=False, blobs=True, tracks=True, labels=True)
