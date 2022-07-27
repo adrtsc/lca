@@ -6,7 +6,7 @@ import napari
 
 
 # load settings
-settings_path = Path(r"/scripts/settings/20220414_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220414_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
@@ -14,8 +14,6 @@ with open(settings_path, 'r') as stream:
 feature_path = Path(settings['paths']['feature_path'])
 
 fv = pd.read_csv(feature_path.joinpath('site_0003_nuclei_feature_values.csv'))
-
-import btrack
 
 
 from lca.ndt.measure_new import measure_tracks_2DT

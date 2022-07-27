@@ -9,7 +9,7 @@ import SimpleITK as sitk
 timepoint = 0
 
 # load settings
-settings_path = Path(r"/scripts/settings/20220414_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220414_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 

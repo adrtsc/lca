@@ -15,10 +15,10 @@ from abbott.conversions import to_itk
 def iterate_time(func):
     @functools.wraps(func)
     def wrapper_decorator(**kwargs):
-        """
-           Wrapper function to apply measurement function for 2D label images
-           on 2DT label images.
-        """
+    """
+       Wrapper function to apply measurement function for 2D label images
+       on 2DT label images.
+    """
 
         if 'label_image' in kwargs:
             dims = kwargs['label_image'].shape
