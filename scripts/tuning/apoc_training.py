@@ -9,7 +9,7 @@ import SimpleITK as sitk
 timepoint = 0
 
 # load settings
-settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220414_settings.yml")
+settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220818_settings.yml")
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
@@ -17,7 +17,7 @@ with open(settings_path, 'r') as stream:
 level = 'level_00'
 
 # define which channel should be used for segmentation
-channel = 'C02'
+channel = 'sdc-GFP'
 
 # get all paths from settings
 zarr_path = Path(settings['paths']['zarr_path'])

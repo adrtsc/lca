@@ -10,7 +10,7 @@ timepoint = int(sys.argv[1])
 
 print(timepoint)
 
-channel = 'C02'
+channel = 'sdc-GFP'
 
 # load settings
 settings_path = Path(sys.argv[2])
@@ -23,7 +23,7 @@ zarr_path = Path(settings['paths']['zarr_path'])
 zarr_files = zarr_path.glob('*.zarr')
 zarr_files = [fyle for fyle in zarr_files]
 
-cl_filename = Path(r"/data/active/atschan/20220414_hiPSC_MS2_CV7K/apoc/20220414.cl")
+cl_filename = Path(r"/data/active/atschan/20220818_hiPSC_MS2/apoc/PixelClassifier.cl")
 classifier = apoc.PixelClassifier(cl_filename)
 
 for fyle in zarr_files:

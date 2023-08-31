@@ -1,0 +1,45 @@
+channel_colors:
+  C01: blue
+  C02: green
+  C03: red
+  C04: cyan
+file_extension: .png
+magnification: 60
+microscope: cv7k
+zspacing_um: 1
+illumination_correction: true
+cellpose:
+  nuclei:
+    model: nuclei
+    diameter: 120
+    resample: true
+    cellprob_threshold: -8
+    flow_threshold: 27
+    do_3D: true
+    gpu: false
+    min_size: 100
+    channel: C01
+    nuclei_channel: false
+    apply_filter: true
+    filter_sigma: 1
+    level: level_03
+  cytoplasm: false
+objects:
+  nuclei:
+    assigned_objects: []
+    measure_blobs: false
+    measure_intensity:
+      C01: level_03
+      C02: level_03
+      C03: level_03
+      C04: level_03
+    measure_morphology: level_03
+    measure_tracks: false
+paths:
+  feature_path: /data/active/atschan/20230306_apex2_validation_protease_3D/features
+  zarr_path: /data/active/atschan/20230306_apex2_validation_protease_3D/zarr_lca
+  illcorr_path: /data/active/atschan/20220816_illumination_correction/
+  img_path: /data/active/atschan/20230306_apex2_validation_protease_3D/
+
+
+

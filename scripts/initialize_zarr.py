@@ -47,8 +47,10 @@ def extract_metadata_cv7k(img_files):
     n_tp = len(np.unique(
         [re.search("T[0-9]{4}(?=F)",
                    str(fyle)).group(0) for fyle in img_files]))
+    wells = np.unique([re.search("[a-zA-Z][0-9]{2}(?=_)",
+                       str(fyle)).group(0) for fyle in img_files])
 
-    return channel_names, n_sites, n_slices, n_tp
+    return channel_names, n_sites, n_slices, n_tp, wells
 
 
 def main():
@@ -63,6 +65,7 @@ def main():
     mag = settings['magnification']
     file_extension = settings['file_extension']
     microscope = settings['microscope']
+    zspacing_um = settings['zspacing_um']
 
     if microscope == 'cv7k':
         img_files = list(img_path.glob(f'*.{file_extension}'))
@@ -94,7 +97,7 @@ def main():
                         chunks=chunk,
                         dtype='uint16')
 
-                    d.attrs["element_size_um"] = (1,
+                    d.attrs["element_size_um"] = (zspacing_um,
                                                   PIXEL_SIZE_UM / mag * 2 ** level,
                                                   PIXEL_SIZE_UM / mag * 2 ** level)
 

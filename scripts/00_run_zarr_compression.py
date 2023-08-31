@@ -10,13 +10,13 @@ SLURM_COMMAND = """#! /bin/sh
 #SBATCH --array=1-{0}
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
-#SBATCH --mem-per-cpu=60000m
+#SBATCH --mem-per-cpu=8000m
 #SBATCH --cpus-per-task=1
 #SBATCH --time=240
 
 n="$SLURM_ARRAY_TASK_ID"
 
-exec python zarr_compression_illcorr.py $n {1}
+exec python zarr_compression_illcorr_per_site.py $n {1}
 """
 
 # load settings
@@ -33,26 +33,16 @@ img_files = [fyle for fyle in img_files]
 
 # check if image files contain multiple sites
 if microscope == 'visiscope':
-    if any([bool(re.search('(?<=_s)[0-9]{1,}',
-                           str(fyle))) for fyle in img_files]):
-        n_sites = len(np.unique(
-            [int(re.search("(?<=_s)[0-9]{1,}",
-                           str(fyle)).group(0)) for fyle in img_files]))
-
-    elif any([bool(re.search('(?<=_)[0-9]{1,}',
-                           str(fyle))) for fyle in img_files]):
-        n_sites = len(np.unique(
-            [int(re.search("(?<=_)[0-9]{1,}",
-                           str(fyle)).group(0)) for fyle in img_files]))
-
-    else:
-        n_sites = 1
+    n_tp = len(np.unique(
+        [re.search("_t[0-9]{1,3}.stk",
+                   str(fyle)).group(0) for fyle in img_files]))
 elif microscope == 'cv7k':
-    n_sites = len(np.unique(
-        [int(re.search("(?<=F)[0-9]{3}",
-                       str(fyle)).group(0)) for fyle in img_files]))
+    # calling it sites, but they are timepoints
+    n_tp = len(np.unique(
+        [re.search("T[0-9]{4}(?=F)",
+                   str(fyle)).group(0) for fyle in img_files]))
 
 with open("temp.sh", "w") as f:
-    f.write(SLURM_COMMAND.format(n_sites, settings_path))
+    f.write(SLURM_COMMAND.format(n_tp, settings_path))
 os.system("sbatch temp.sh")
 os.unlink("temp.sh")

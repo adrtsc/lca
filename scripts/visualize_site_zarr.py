@@ -15,7 +15,7 @@ def visualize_site(settings,
                    labels=True,
                    boundaries=True,
                    tracks=True,
-                   blobs=True):
+                   blobs=True, blobs_file=False):
 
     zarr_path = Path(settings['paths']['zarr_path'])
     feature_path = Path(settings['paths']['feature_path'])
@@ -83,11 +83,30 @@ def visualize_site(settings,
                               visible=False,
                               scale=scaling_blobs)
 
+    if blobs_file:
+        # add blobs
+        blobs = pd.read_csv(Path(blobs_file))
+        blobs = blobs.loc[blobs.site == site - 1]
+        filter = blobs['timepoint'].isin(np.arange(start_timepoint, end_timepoint))
+        blobs = blobs[filter]
+        blobs['centroid-1_scaled'] = blobs['centroid-1_blobs'] / 2**level
+        blobs['centroid-2_scaled'] = blobs['centroid-2_blobs'] / 2**level
+        blobs['centroid-0_scaled'] = blobs['centroid-0_blobs'] / scaling[0]/scaling[1]
+        scaling_blobs = scaling.copy()
+        scaling_blobs.insert(0, 1)
+        viewer.add_points(blobs[['timepoint', 'centroid-0_scaled', 'centroid-1_scaled', 'centroid-2_scaled']], name=str(blobs_file).replace('.csv', ''),
+                          face_color='transparent',
+                          edge_color='white',
+                          size=blobs['size_blobs']/2**level,
+                          visible=False,
+                          scale=scaling_blobs)
+
     return viewer
 
 
 # load settings
-with open('scripts/settings/20220224_settings.yml', 'r') as stream:
+with open(r'Y:\PhD\Code\Python\lca\scripts\settings\20220317_settings.yml', 'r') as stream:
     settings = yaml.safe_load(stream)
 
-viewer = visualize_site(settings, 2, start_timepoint=0, end_timepoint=60, level=0, boundaries=False, blobs=True, tracks=True, labels=True)
+viewer = visualize_site(settings, 5, start_timepoint=0, end_timepoint=1, level=1, boundaries=False, blobs=False, tracks=False, labels=False)
+

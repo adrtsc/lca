@@ -10,8 +10,8 @@ SLURM_COMMAND = """#! /bin/sh
 #SBATCH --array=1-{0}
 #SBATCH -o /home/atschan/PhD/slurm_reports/slurm-%A_%a.out
 #SBATCH -e /home/atschan/PhD/slurm_reports/slurmerror-%A_%a.out
-#SBATCH --mem-per-cpu=7500m
-#SBATCH --cpus-per-task=8
+#SBATCH --mem-per-cpu=40000m
+#SBATCH --cpus-per-task=2
 #SBATCH --time=480
 
 n="$SLURM_ARRAY_TASK_ID"
@@ -39,7 +39,7 @@ if microscope == 'visiscope':
             [int(re.search("(?<=_s)[0-9]{1,}",
                            str(fyle)).group(0)) for fyle in img_files]))
     else:
-        n_sites = 25
+        n_sites = 1
 elif microscope == 'cv7k':
     n_sites = len(np.unique(
         [int(re.search("(?<=F)[0-9]{3}",

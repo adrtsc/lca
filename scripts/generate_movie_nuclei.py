@@ -6,20 +6,22 @@ import numpy as np
 import napari
 
 padding = 200
-level = 2
+level = 0
 channel = 'sdc-RFP-605-52'
 
 settings_path = Path(r"Y:\PhD\Code\Python\lca\scripts\settings\20220224_settings.yml")
 feature_path = Path(r"Z:\20220224_hiPSC_MS2\features\distance_measurements")
 
-fv = pd.read_csv(feature_path.joinpath("20220224_feature_values_preprocessed_clustered_time.csv"))
+#fv = pd.read_csv(feature_path.joinpath("20220224_feature_values_preprocessed_clustered_time.csv"))
+
+fv = pd.read_csv(r"Z:\20220224_hiPSC_MS2\features\20220224_fv_preprocessed_step2_clustered.csv")
 
 with open(settings_path, 'r') as stream:
     settings = yaml.safe_load(stream)
 
 zarr_path = Path(settings['paths']['zarr_path'])
 
-zarr_sample = zarr.open(zarr_path.joinpath('site_0001.zarr'), mode='r')
+zarr_sample = zarr.open(zarr_path.joinpath('site_0025.zarr'), mode='r')
 scaling = zarr_sample[f'intensity_images/sdc-GFP/level_{level:02d}'].attrs['element_size_um']
 
 scale_corr = 0.8667
@@ -27,7 +29,9 @@ scale_corr = 0.8667
 
 # take 5 sample tracks of each cluster
 
-sample = fv.groupby(['cluster']).sample(3)['unique_track_id']
+fv = fv.loc[fv['mock'] == False]
+
+sample = fv.groupby(['TSS_class_label']).sample(1)['unique_track_id']
 
 sample_df = fv[np.isin(fv['unique_track_id'], sample)]
 
@@ -50,7 +54,6 @@ max_coords = np.array(sample_df[['bbox-5', 'bbox-4']])
 bbox_max = max_coords-min_coords
 
 
-
 sample_df['centroid-1'] = sample_df['centroid-1']/scale_corr + padding
 sample_df['centroid-2'] = sample_df['centroid-2']/scale_corr + padding
 
@@ -61,9 +64,9 @@ sample_df['new_bbox-4'] = (sample_df['centroid-1'] + 2*bbox_max[:, 1].max()).ast
 
 out = []
 
-for cl_lbl in sorted(sample_df['cluster'].unique()):
+for cl_lbl in sorted(sample_df['TSS_class_label'].unique()):
 
-    cl_df = sample_df[sample_df['cluster'] == cl_lbl]
+    cl_df = sample_df[sample_df['TSS_class_label'] == cl_lbl]
     print(f'cluster_{cl_lbl}')
 
     class_out = []
@@ -76,7 +79,7 @@ for cl_lbl in sorted(sample_df['cluster'].unique()):
 
         out_track = []
 
-        for timepoint in range(60):
+        for timepoint in np.arange(0, 60, 10):
 
             print(timepoint)
             track_tp = track[track['timepoint'] == timepoint]
@@ -117,8 +120,9 @@ img = np.concatenate(out, axis=3)
 rfp = img
 gfp = img
 
+img2 = img.max(axis=1)
 viewer = napari.Viewer()
-viewer.add_image(img, scale=scaling, contrast_limits=(105, 350), colormap='magenta')
+viewer.add_image(img2, scale=scaling, contrast_limits=(105, 350), colormap='magenta')
 
 import seaborn as sns
 import matplotlib.pyplot as plt

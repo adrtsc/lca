@@ -4,147 +4,142 @@ from pathlib import Path
 from skimage import io
 from natsort import natsorted
 from skimage.transform import pyramid_gaussian
-from skimage.restoration import rolling_ball, ellipsoid_kernel
-from skimage.filters import gaussian
 import re
 import cv2
 import yaml
 import sys
 
-# define the site this job should process
-site = int(sys.argv[1])
 
-# load settings
-settings_path = Path(sys.argv[2])
-with open(settings_path, 'r') as stream:
-    settings = yaml.safe_load(stream)
+def correct_illumination(img, illcorr_path, channel, microscope):
 
-# get all paths from settings
-img_path = Path(settings['paths']['img_path'])
-illcorr_path = Path(settings['paths']['illcorr_path'])
-output_path = Path(settings['paths']['zarr_path'])
-mag = settings['magnification']
-file_extension = settings['file_extension']
-illumination_correction = settings['illumination_correction']
-illumination_correction = settings['illumination_correction']
+    if microscope == 'cv7k':
 
-img_files = img_path.glob('*.%s' % file_extension)
-img_files = [fyle for fyle in img_files]
-channel_names = np.unique(
-    [re.search("(?<=_w[0-9]).*(?=_s)",
-               str(fyle)).group(0) for fyle in img_files])
+        illum_files = list(img_path.joinpath('stuff').glob('*.tif'))
+        illum = natsorted(
+            [fyle for fyle in illum_files if "SC_BP" in str(fyle)])
+        dark = natsorted(
+            [fyle for fyle in illum_files if "DC_sCMOS" in str(fyle)])
 
+        ch_idx = int(''.join(filter(str.isdigit, channel)))
 
-# pre-load the illumination correction files:
-illum_corr = {key: [] for key in channel_names}
-illcorr_files = sorted(illcorr_path.glob('*.png'))
+        dark_channel = io.imread(dark_files[0])
+        flat_channel = io.imread(illum_files[ch_idx])
+        dark = np.repeat(dark_channel[np.newaxis, :, :], img.shape[0], axis=0)
+        flat = flat_channel / np.max(flat_channel)
 
-for fyle in illcorr_files:
-    for channel in channel_names:
-        if channel in str(fyle):
-            img = io.imread(fyle)
-            illum_corr[channel].append(img)
+        corrected_img = cv2.subtract(img, dark) / flat
 
+    elif microscope == 'visiscope':
+        # get dark image of the channel
+        dark_files = illcorr_path.joinpath('dark').glob('*.png')
+        dark_channel = [fyle for fyle in dark_files if channel in str(fyle)]
+        dark_image = io.imread(dark_channel[0])
+        
+        # get illumination image of the channel
+        illum_files = illcorr_path.joinpath('illumination').glob('*.png')
+        illum_channel = [fyle for fyle in illum_files if channel in str(fyle)]
+        illum_image = io.imread(illum_channel[0])
+        
+        # adjust illum image so that max value is 1
+        illum_image = illum_image / np.max(illum_image)
+        
+        # adjust dimensions
+        dark_image = np.repeat(dark_image[np.newaxis, :, :], img.shape[0], axis=0)
+        illum_image = np.repeat(illum_image[np.newaxis, :, :], img.shape[0], axis=0)
 
-def correct_illumination(img, dark_channel, flat_channel):
-
-    dark = np.repeat(dark_channel[np.newaxis, :, :], img.shape[0], axis=0)
-    flat = flat_channel / np.max(flat_channel)
-
-    corrected_img = cv2.subtract(img, dark) / flat
+        corrected_img = cv2.subtract(img, dark_image) / illum_image
+        corrected_img = corrected_img.astype('uint16')
 
     return corrected_img
 
-# iterate over channels and timepoints and save into dataset
-if any([bool(re.search('(?<=_s)[0-9]{1,}', str(fyle))) for fyle in img_files]):
-    site_files = img_path.glob('*_s%d_t[0-9]*.%s' % (site, file_extension))
-else:
-    site_files = img_path.glob('*.%s' % file_extension)
 
-site_files = [str(fyle) for fyle in site_files]
-site_files = natsorted(site_files)
+def get_cv7k_stack(site_files, channel):
+    img_stack = []
+    channel_files = [fyle for fyle in site_files if channel in str(fyle)]
+    for fyle in channel_files:
+        img_stack.append(io.imread(fyle))
+    img = np.stack(img_stack)
+    return img
 
-channel_data = {key: [] for key in channel_names}
+def get_visiscope_stack(site_files, channel):
+    channel_files = [fyle for fyle in site_files if channel in str(fyle)]
+    img = io.imread(channel_files[0], plugin='tifffile')
+    return img
 
-for fyle in site_files:
-    print(fyle)
-    for channel in channel_data:
-        if channel in str(fyle):
-            if file_extension in ['tif', 'stk']:
-                img = io.imread(fyle, plugin="tifffile")
-            else:
-                img = io.imread(fyle)
+def get_sites(img_files, microscope):
+    if microscope == 'cv7k':
+        sites = np.unique(
+            [re.search("F[0-9]{3}(?=L)",
+                       str(fyle)).group(0) for fyle in img_files])
+    elif microscope == 'visiscope':
+        sites = np.unique(
+            [re.search("_s[0-9]{1,}_t",
+                       str(fyle)).group(0) for fyle in img_files])
+        
+        return natsorted(sites)
+    
+def get_image_files(img_path, file_extension, tp, microscope):
+    
+    img_files = img_path.glob(f'*.{file_extension}')
+    
+    if microscope == 'cv7k':
+        img_files = [fyle for fyle in img_files if f'T{tp:04d}F' in str(fyle)]
+    elif microscope == 'visiscope':
+        img_files = [fyle for fyle in img_files if f'_t{tp}.stk' in str(fyle)]
+        
+    return img_files
+        
+
+def main():
+    # define the tp this job should process
+    tp = int(sys.argv[1])
+
+    # load settings
+    settings_path = Path(sys.argv[2])
+    with open(settings_path, 'r') as stream:
+        settings = yaml.safe_load(stream)
+
+    # get all paths from settings
+    img_path = Path(settings['paths']['img_path'])
+    illcorr_path = Path(settings['paths']['illcorr_path'])
+    output_path = Path(settings['paths']['zarr_path'])
+    file_extension = settings['file_extension']
+    illumination_correction = settings['illumination_correction']
+    microscope = settings['microscope']
+    
+    # get the image files of the current timepoint
+    img_files = get_image_files(img_path, file_extension, tp,  microscope)
+    
+    # get the sites 
+    sites = get_sites(img_files, microscope)
+
+    # iterate over channels and sites and save into dataset
+
+    for idx, site in enumerate(sites):
+        z = zarr.open(output_path.joinpath(f'site_{idx+1:04d}.zarr'), mode='a')
+        print(site)
+        site_files = natsorted(
+            [fyle for fyle in img_files if site in str(fyle)])
+        for channel in z['intensity_images'].keys():
+            print(channel)
+            if microscope == 'cv7k':
+                img = get_cv7k_stack(site_files, channel)
+            elif microscope == 'visiscope':
+                img = get_visiscope_stack(site_files, channel)
 
             if illumination_correction:
-                corrected_image = correct_illumination(img,
-                                                       illum_corr[channel][0],
-                                                       illum_corr[channel][1])
-                channel_data[channel].append(corrected_image.astype('uint16'))
-            else:
-                channel_data[channel].append(img)
+                img = correct_illumination(img, illcorr_path, channel, microscope)
+
+            pyramid = tuple(pyramid_gaussian(img,
+                                             max_layer=3,
+                                             downscale=2,
+                                             preserve_range=True,
+                                             channel_axis=0))
+
+            for ilvl, level in enumerate(pyramid):
+                z[f'intensity_images/{channel}/level_{ilvl:02d}'][tp-1, :, :,
+                :] = level
 
 
-def generate_pyramid(img, levels=4):
-
-    tp_list = list(img)
-    pyramids = []
-
-    for tp_idx, timepoint in enumerate(tp_list):
-        # generate the pyramid
-        pyramid = tuple(pyramid_gaussian(timepoint,
-                                         max_layer=levels,
-                                         downscale=2,
-                                         preserve_range=True,
-                                         channel_axis=0))
-
-        pyramids.append(pyramid)
-
-    output = [np.stack(
-        [pyramid[i] for pyramid in pyramids]) for i in range(levels)]
-
-    return output
-
-
-# Open the experiment zarr file and append data
-if output_path.joinpath(f'site_{site:04}.zarr').exists():
-    z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='a')
-    print('opening in append mode')
-else:
-    z = zarr.open(output_path.joinpath(f'site_{site:04}.zarr'), mode='w')
-    print('making new file')
-
-chunk = list(np.shape(np.squeeze(np.stack(channel_data[channel_names[0]]))))
-chunk[0] = 1
-chunk = tuple(chunk)
-
-for channel in channel_data:
-
-    for tp_idx, timepoint in enumerate(channel_data[channel]):
-
-        # timepoint = subtract_background(timepoint, 500, 10)
-
-        pyramid = tuple(pyramid_gaussian(timepoint,
-                                         max_layer=3,
-                                         downscale=2,
-                                         preserve_range=True,
-                                         channel_axis=0))
-
-        for idx, level in enumerate(pyramid):
-            # create dataset for each resolution level
-            if not hasattr(z, f'intensity_images/{channel}/level_{idx:02d}'):
-                d = z.create_dataset(
-                    f'intensity_images/{channel}/level_{idx:02d}',
-                    shape=np.insert(np.shape(level),
-                                    0,
-                                    len(channel_data[channel])),
-                    chunks=chunk,
-                    dtype='uint16')
-
-                d.attrs["element_size_um"] = (1,
-                                              6.5 / mag * 2 ** idx,
-                                              6.5 / mag * 2 ** idx)
-
-            z[f'intensity_images/{channel}/level_{idx:02d}'][tp_idx, :, :, :] = level
-    
-            
-
+if __name__ == "__main__":
+    main()

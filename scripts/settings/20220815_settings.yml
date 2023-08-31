@@ -1,0 +1,65 @@
+channel_colors:
+  sdcCy5: red
+  sdcDAPIxmRFPm: blue
+  sdc-GFP: green
+  sdc-RFP-605-52: red
+  sdcYFP: yellow
+file_extension: stk
+magnification: 60
+microscope: visiscope
+spacing:
+- 1
+- 1
+- 9.25
+scaling: 9.25
+illumination_correction: false
+cellpose:
+  nuclei:
+    model: nuclei
+    diameter: 30
+    resample: true
+    cellprob_threshold: -8
+    flow_threshold: 27
+    do_3D: true
+    gpu: false
+    min_size: 100
+    channel: sdc-RFP-605-52
+    nuclei_channel: false
+    apply_filter: true
+    filter_sigma: 1
+    level: level_03
+  cytoplasm: false
+objects:
+  nuclei:
+    assigned_objects: []
+    measure_blobs:
+      channels:
+        - sdcRFP590-JF549
+      settings:
+        exclude_border: true
+        max_sigma: 2
+        min_sigma: 2
+        num_sigma: 1
+        overlap: 0.5
+        threshold: 0.00025
+    measure_intensity:
+      sdc-GFP: level_03
+      sdcRFP590-JF549: level_03
+    measure_morphology: level_03
+    measure_tracks:
+      max_distance: 10
+      time_window: 3
+      max_split_distance: 0
+      max_gap_closing_distance: 15
+      allow_splitting: false
+      allow_merging: false
+      centroid_0: centroid-1
+      centroid_1: centroid-2
+paths:
+  feature_path: Z:/20220815_hiPSC_MS2/features
+  zarr_path: Z:/20220815_hiPSC_MS2/zarr
+  illcorr_path: /data/active/atschan/illumination_correction/20211014_60x_oil
+  img_path: Z:/20220815_hiPSC_MS2
+
+
+

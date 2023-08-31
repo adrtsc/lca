@@ -19,10 +19,10 @@ zarr_path = Path(settings['paths']['zarr_path'])
 filename = f'site_{site:04d}.zarr'
 file = zarr.open(zarr_path.joinpath(filename), "r")
 
-if len(settings['spacing']) == 2:
+if len(file['intensity_images']['sdc-GFP']['level_00'].attrs['element_size_um']) == 2:
     # extract metadata and features
     top_level_features.main(file, settings)
-elif len(settings['spacing']) == 3:
+elif len(file['intensity_images']['sdc-GFP']['level_00'].attrs['element_size_um']) == 3:
     # extract metadata and features
     top_level_features_zarr.main(file, filename,  settings)
 
