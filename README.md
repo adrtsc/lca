@@ -1,5 +1,7 @@
 # live cell analysis (lca) python tool
 
+<img src="https://github.com/adrtsc/lca/blob/3D/logo/lca_logo.png?raw=true" width="250" title="lca" alt="lca" align="right" vspace = "100">
+
 This repository contains code for the analysis of 2DT and 3DT live imaging data. Typically, the processing of such data in this framework consists of the following steps:
 
 <ol>
